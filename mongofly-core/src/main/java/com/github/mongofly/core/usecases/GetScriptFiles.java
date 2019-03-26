@@ -1,4 +1,4 @@
-package com.github.mongofly.core.files;
+package com.github.mongofly.core.usecases;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

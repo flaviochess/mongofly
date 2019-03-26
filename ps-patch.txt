@@ -1,0 +1,79 @@
+diff --git a/mongofly-core/src/main/java/com/github/mongofly/core/ExecuteScripts.java b/mongofly-core/src/main/java/com/github/mongofly/core/ExecuteScripts.java
+index 8ca10cf..dd842d6 100644
+--- a/mongofly-core/src/main/java/com/github/mongofly/core/ExecuteScripts.java
++++ b/mongofly-core/src/main/java/com/github/mongofly/core/ExecuteScripts.java
+@@ -1,6 +1,8 @@
+ package com.github.mongofly.core;
+ 
+-import com.github.mongofly.core.files.GetScriptFiles;
++import com.github.mongofly.core.domains.Mongofly;
++import com.github.mongofly.core.usecases.GetScriptFiles;
++import com.github.mongofly.core.usecases.MongoflyRepository;
+ import lombok.extern.slf4j.Slf4j;
+ import org.springframework.boot.context.event.ApplicationReadyEvent;
+ import org.springframework.context.event.EventListener;
+@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
+ import java.nio.file.Path;
+ import java.util.Comparator;
+ import java.util.List;
++import java.util.Optional;
+ 
+ @Slf4j
+ @Component
+@@ -16,6 +19,8 @@ public class ExecuteScripts {
+ 
+     private GetScriptFiles getScriptFiles;
+ 
++    private MongoflyRepository mongoflyRepository;
++
+     @EventListener(ApplicationReadyEvent.class)
+     public void execute() {
+ 
+@@ -30,7 +35,9 @@ public class ExecuteScripts {
+ 
+     private boolean isUnexecutedScripts(Path path) {
+ 
+-        return true;
++        //extract version from file name
++        Optional<Mongofly> execution = mongoflyRepository.findByVersion("");
++        return !execution.isPresent();
+     }
+ 
+     private String getFileName(Path path) {
+diff --git a/mongofly-core/src/main/java/com/github/mongofly/core/domains/Mongofly.java b/mongofly-core/src/main/java/com/github/mongofly/core/domains/Mongofly.java
+index bebea4c..a368bd7 100644
+--- a/mongofly-core/src/main/java/com/github/mongofly/core/domains/Mongofly.java
++++ b/mongofly-core/src/main/java/com/github/mongofly/core/domains/Mongofly.java
+@@ -1,4 +1,22 @@
+ package com.github.mongofly.core.domains;
+ 
++import lombok.Getter;
++import lombok.Setter;
++
++import java.util.Date;
++
++@Getter
++@Setter
+ public class Mongofly {
++
++    private String id;
++
++    private String version;
++
++    private String script;
++
++    private Date executedOn;
++
++    private boolean success;
++
+ }
+diff --git a/mongofly-core/src/main/java/com/github/mongofly/core/usecases/GetScriptFiles.java b/mongofly-core/src/main/java/com/github/mongofly/core/usecases/GetScriptFiles.java
+index 4d56c4d..2546489 100644
+--- a/mongofly-core/src/main/java/com/github/mongofly/core/usecases/GetScriptFiles.java
++++ b/mongofly-core/src/main/java/com/github/mongofly/core/usecases/GetScriptFiles.java
+@@ -1,4 +1,4 @@
+-package com.github.mongofly.core.usecases.files;
++package com.github.mongofly.core.usecases;
+ 
+ import lombok.extern.slf4j.Slf4j;
+ import org.springframework.stereotype.Component;
