@@ -35,8 +35,10 @@ public class ExecuteScripts {
 
     private boolean isUnexecutedScripts(Path path) {
 
-        //extract version from file name
-        Optional<Mongofly> execution = mongoflyRepository.findByVersion("");
+        String scriptName = getFileName(path);
+        String version = scriptName.split("__")[0];
+
+        Optional<Mongofly> execution = mongoflyRepository.findByVersion(version);
         return !execution.isPresent();
     }
 
