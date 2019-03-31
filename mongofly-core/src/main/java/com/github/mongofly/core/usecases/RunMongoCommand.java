@@ -7,6 +7,8 @@ public class RunMongoCommand {
 
     public void run(String command) {
 
+        System.out.println(command);
+
         //db.collection.insert({param1: value1, param2: value2, ...});
 
         //verifica se começa com db.collection
