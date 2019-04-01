@@ -43,10 +43,13 @@ public class ExecuteScripts {
 
     }
 
+    //TODO: o que fazer quando for um script que executou e está success false?
     private boolean isUnexecutedScripts(Path path) {
 
         String version = getFileVersion(path);
         Optional<Mongofly> execution = mongoflyRepository.findByVersion(version);
+
+        log.debug("Script " + version + " executed: " + execution.isPresent());
         return !execution.isPresent();
     }
 
