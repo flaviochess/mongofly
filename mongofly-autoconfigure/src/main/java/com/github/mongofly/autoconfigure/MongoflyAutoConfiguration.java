@@ -3,7 +3,8 @@ package com.github.mongofly.autoconfigure;
 import com.github.mongofly.core.ExecuteScripts;
 import com.github.mongofly.core.usecases.GetScriptFiles;
 import com.github.mongofly.core.usecases.MongoflyRepository;
-import com.github.mongofly.core.usecases.RunMongoCommand;
+import com.github.mongofly.core.usecases.commands.CommandRunnerFactory;
+import com.github.mongofly.core.usecases.commands.RunMongoCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -34,9 +35,9 @@ public class MongoflyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RunMongoCommand runMongoCommand() {
+    public RunMongoCommand runMongoCommand(CommandRunnerFactory commandRunnerFactory) {
 
-        return new RunMongoCommand();
+        return new RunMongoCommand(commandRunnerFactory);
     }
 
     @Bean
@@ -44,5 +45,12 @@ public class MongoflyAutoConfiguration {
     public MongoflyRepository mongoflyRepository() {
 
         return new MongoRepositoryFactory(mongoTemplate).getRepository(MongoflyRepository.class);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public CommandRunnerFactory commandRunnerFactory() {
+
+        return new CommandRunnerFactory();
     }
 }

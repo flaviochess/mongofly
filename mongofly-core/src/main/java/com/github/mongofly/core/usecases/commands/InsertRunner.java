@@ -2,6 +2,7 @@ package com.github.mongofly.core.usecases.commands;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +20,10 @@ import java.util.Stack;
      */
 
 
-class InsertRunner {
+class InsertRunner implements CommandRunner {
 
-    private void run(String collectionName, String commandBody) {
+    @Autowired
+    public void run(String collectionName, String commandBody) {
 
         commandBody = commandBody.trim();
 
