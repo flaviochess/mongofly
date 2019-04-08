@@ -2,7 +2,9 @@ package com.github.mongofly.core.usecases.commands;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,12 @@ import java.util.Stack;
 
 
 class InsertRunner implements CommandRunner {
+
+    private final MongoTemplate mongoTemplate;
+
+    public InsertRunner(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
 
     @Autowired
     public void run(String collectionName, String commandBody) {
@@ -42,11 +50,6 @@ class InsertRunner implements CommandRunner {
 
     }
 
-    private void runInsert(String collectionName, String json) {
-
-        System.out.println(collectionName + " - " + json);
-    }
-
     private boolean isCommnadBodyValidStart(String commandBody) {
 
         return commandBody.startsWith("{") || commandBody.startsWith("[");
@@ -63,6 +66,7 @@ class InsertRunner implements CommandRunner {
             throw new RuntimeException();
         }
 
+        System.out.print("Simple command: ");
         runInsert(collectionName, commandBody);
     }
 
@@ -124,6 +128,16 @@ class InsertRunner implements CommandRunner {
 
     private void runMultipleCommands(String collectionName, List<String> commandBodyList) {
 
+        System.out.print("multiple commands: ");
         commandBodyList.forEach(commandBodyJson -> runInsert(collectionName, commandBodyJson));
+    }
+
+    private void runInsert(String collectionName, String json) {
+
+        System.out.println(collectionName + " - " + json);
+
+
+        //Document.parse()
+        //mongoTemplate.insert(new Object(), collectionName);
     }
 }

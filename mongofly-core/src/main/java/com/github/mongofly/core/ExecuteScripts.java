@@ -3,7 +3,7 @@ package com.github.mongofly.core;
 import com.github.mongofly.core.domains.Mongofly;
 import com.github.mongofly.core.usecases.GetScriptFiles;
 import com.github.mongofly.core.usecases.MongoflyRepository;
-import com.github.mongofly.core.usecases.RunMongoCommand;
+import com.github.mongofly.core.usecases.commands.RunMongoCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

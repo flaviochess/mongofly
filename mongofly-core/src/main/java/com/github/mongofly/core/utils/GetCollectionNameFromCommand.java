@@ -1,4 +1,4 @@
-package com.github.mongofly.core.usecases.commands;
+package com.github.mongofly.core.utils;
 
 public class GetCollectionNameFromCommand {
 
