@@ -9,6 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Component
 public class RunMongoCommand {
@@ -53,8 +57,22 @@ public class RunMongoCommand {
             throw new RuntimeException();
         }
 
-        DBObject convertedCommand = commandConvertFactory.factory(command).convert(command);
-        CommandResult commandResult = mongoTemplate.executeCommand(convertedCommand); //TODO: trabalhar com o resultado
+        List<DBObject> convertedCommands = commandConvertFactory.factory(command).convert(command);
+
+        List<CommandResult> commandResults = new ArrayList();
+
+        convertedCommands.forEach(convertedCommand -> {
+            CommandResult commandResult = mongoTemplate.executeCommand(convertedCommand);
+            if (!commandResult.ok()) {
+                throw new RuntimeException(commandResult.getErrorMessage());
+            }
+
+            commandResults.add(commandResult);
+        });
+
+        int totalInserts = commandResults.stream().mapToInt(result -> result.getInt("n")).sum();
+
+        //return ou debug totalInserts
     }
 
 }

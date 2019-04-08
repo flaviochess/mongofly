@@ -2,17 +2,21 @@ package com.github.mongofly.core.usecases.converts;
 
 import com.github.mongofly.core.utils.GetBodyFromCommand;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
+import com.google.common.collect.Lists;
 import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
+import java.util.stream.Collectors;
 
 //TODO: utilizar constantes no lugar das strings
 class InsertConvert implements CommandConvert {
 
     @Override
-    public DBObject convert(String command) {
+    public List<DBObject> convert(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
@@ -41,21 +45,14 @@ class InsertConvert implements CommandConvert {
 
         }
 
-        //TODO: quebrar em lista de retorno, erro dado: "exceeded maximum write batch size of 1000"
-        //não pode ter mais de 1000 elementos na lista de documentos
-        CommandBuilder commandBuilder = CommandBuilder.insert(collectionName);
-        commandBuilder.addManyDocument(documents);
-
+        List<List<Document>> partitionedDocuments = partitionDocuments(documents);
         Document operation = operationParameters.orElse(new Document());
-        if (operation.containsKey("ordered")) {
-            commandBuilder.ordered(operation.getBoolean("ordered"));
-        }
 
-        if (operation.containsKey("writeConcern")) {
-            commandBuilder.writeConcern(operation.getString("writeConcern"));
-        }
+        List<DBObject> inserts = partitionedDocuments.stream()
+                .map(docs -> this.buildDBObject(collectionName, docs, operation))
+                .collect(Collectors.toList());
 
-        return commandBuilder.build();
+        return inserts;
     }
 
     private boolean isSimpleCommand(String commandBody) {
@@ -109,5 +106,30 @@ class InsertConvert implements CommandConvert {
     private Document convertToDocument(String commandBody) {
 
         return Document.parse(commandBody);
+    }
+
+    private List<List<Document>> partitionDocuments(List<Document> documents) {
+
+        BigDecimal documentsSize = new BigDecimal(documents.size());
+        BigDecimal limitSize = new BigDecimal(DOCUMENTS_LIMIT_SIZE);
+
+        int partitionsNumber = documentsSize.divide(limitSize).setScale(0, RoundingMode.UP).intValue();
+
+        return Lists.partition(documents, partitionsNumber);
+    }
+
+    private DBObject buildDBObject(String collectionName, List<Document> documents, Document operationParameters) {
+
+        CommandBuilder commandBuilder = CommandBuilder.insert(collectionName).addManyDocument(documents);
+
+        if (operationParameters.containsKey("ordered")) {
+            commandBuilder.ordered(operationParameters.getBoolean("ordered"));
+        }
+
+        if (operationParameters.containsKey("writeConcern")) {
+            commandBuilder.writeConcern(operationParameters.getString("writeConcern"));
+        }
+
+        return commandBuilder.build();
     }
 }
