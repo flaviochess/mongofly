@@ -88,7 +88,6 @@ public class CommandBuilder {
 
         switch (commandType) {
             case INSERT:
-                System.out.println("Count: " + documents.size()); //TODO: remover
                 dbObject.append("documents", documents);
                 break;
             case UPDATE:

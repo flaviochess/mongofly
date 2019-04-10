@@ -20,6 +20,7 @@ class InsertConvert implements CommandConvert {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
+
         List<Document> documents;
         Optional<Document> operationParameters = Optional.empty();
 
@@ -110,12 +111,7 @@ class InsertConvert implements CommandConvert {
 
     private List<List<Document>> partitionDocuments(List<Document> documents) {
 
-        BigDecimal documentsSize = new BigDecimal(documents.size());
-        BigDecimal limitSize = new BigDecimal(DOCUMENTS_LIMIT_SIZE);
-
-        int partitionsNumber = documentsSize.divide(limitSize).setScale(0, RoundingMode.UP).intValue();
-
-        return Lists.partition(documents, partitionsNumber);
+        return Lists.partition(documents, DOCUMENTS_LIMIT_SIZE);
     }
 
     private DBObject buildDBObject(String collectionName, List<Document> documents, Document operationParameters) {
