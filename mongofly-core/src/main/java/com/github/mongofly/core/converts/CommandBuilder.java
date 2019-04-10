@@ -1,4 +1,4 @@
-package com.github.mongofly.core.usecases.converts;
+package com.github.mongofly.core.converts;
 
 import com.github.mongofly.core.domains.CommandType;
 import com.mongodb.BasicDBObject;
@@ -53,8 +53,8 @@ public class CommandBuilder {
         return new CommandBuilder(CommandType.UPDATE, collectionName);
     }
 
-    public static CommandBuilder delete(String collectionName) {
-        return new CommandBuilder(CommandType.DELETE, collectionName);
+    public static CommandBuilder remove(String collectionName) {
+        return new CommandBuilder(CommandType.REMOVE, collectionName);
     }
 
     public CommandBuilder addDocument(Document document) {
@@ -77,6 +77,7 @@ public class CommandBuilder {
         return this;
     }
 
+    //TODO: trocar strings por constantes
     public DBObject build() {
 
         if (documents.isEmpty()) {
@@ -93,7 +94,7 @@ public class CommandBuilder {
             case UPDATE:
                 dbObject.append("updates", documents);
                 break;
-            case DELETE:
+            case REMOVE:
                 dbObject.append("deletes", documents);
                 break;
         }

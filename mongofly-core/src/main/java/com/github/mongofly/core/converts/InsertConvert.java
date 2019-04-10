@@ -1,18 +1,28 @@
-package com.github.mongofly.core.usecases.converts;
+package com.github.mongofly.core.converts;
 
 import com.github.mongofly.core.utils.GetBodyFromCommand;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
+import com.github.mongofly.core.utils.MongoflyException;
 import com.google.common.collect.Lists;
 import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//TODO: utilizar constantes no lugar das strings
+/*
+    TODO:
+    Possibilities
+
+        * db.collection.insert({param1: value1, param2: value2, ...});
+        * db.collection.insert([{param1: value1, param2: value2}, {param1: value1, param2: value2}]);
+        * db.collection.insert({param1: value1, param2: value2}, {writeConcern: false, ordered: true});
+        * db.collection.insert([{param1: value1, param2: value2}, {param1: value1, param2: value2}], {writeConcern: false, ordered: true});
+
+     */
+
+
 class InsertConvert implements CommandConvert {
 
     @Override
@@ -36,8 +46,8 @@ class InsertConvert implements CommandConvert {
             if (documents.size() > 1) {
                 Document lastDocument = documents.get(documents.size() - 1);
 
-                if (lastDocument.containsKey("ordered") ||
-                        lastDocument.containsKey("writeConcern")) {
+                if (lastDocument.containsKey(ORDERED) ||
+                        lastDocument.containsKey(WRITE_CONVERN)) {
 
                     operationParameters = Optional.of(lastDocument);
                     documents.remove(documents.size() - 1);
@@ -58,8 +68,8 @@ class InsertConvert implements CommandConvert {
 
     private boolean isSimpleCommand(String commandBody) {
 
-        return StringUtils.countMatches(commandBody, '{') == 1 &&
-                StringUtils.countMatches(commandBody, '}') == 1;
+        return StringUtils.countMatches(commandBody, OPEN_CURLY_BRACES) == 1 &&
+                StringUtils.countMatches(commandBody, CLOSE_CURLY_BRACES) == 1;
     }
 
     private List<Document> convertToDocumentList(String commandBody) {
@@ -71,7 +81,7 @@ class InsertConvert implements CommandConvert {
 
         for (int positionOfLetter = 0; positionOfLetter < commandBody.length(); positionOfLetter++) {
 
-            if (commandBody.charAt(positionOfLetter) == '{') {
+            if (commandBody.charAt(positionOfLetter) == OPEN_CURLY_BRACES) {
 
                 bracesStack.push(commandBody.charAt(positionOfLetter));
 
@@ -82,7 +92,7 @@ class InsertConvert implements CommandConvert {
                 continue;
             }
 
-            if (commandBody.charAt(positionOfLetter) == '}') {
+            if (commandBody.charAt(positionOfLetter) == CLOSE_CURLY_BRACES) {
 
                 bracesStack.pop();
 
@@ -97,7 +107,7 @@ class InsertConvert implements CommandConvert {
         }
 
         if (!bracesStack.isEmpty()) {
-            throw new RuntimeException();
+            throw new MongoflyException("Bad bson exception. There are \"{\" without closing: " + commandBody);
         }
 
         return documents;
@@ -118,12 +128,12 @@ class InsertConvert implements CommandConvert {
 
         CommandBuilder commandBuilder = CommandBuilder.insert(collectionName).addManyDocument(documents);
 
-        if (operationParameters.containsKey("ordered")) {
-            commandBuilder.ordered(operationParameters.getBoolean("ordered"));
+        if (operationParameters.containsKey(ORDERED)) {
+            commandBuilder.ordered(operationParameters.getBoolean(ORDERED));
         }
 
-        if (operationParameters.containsKey("writeConcern")) {
-            commandBuilder.writeConcern(operationParameters.getString("writeConcern"));
+        if (operationParameters.containsKey(WRITE_CONVERN)) {
+            commandBuilder.writeConcern(operationParameters.getString(WRITE_CONVERN));
         }
 
         return commandBuilder.build();

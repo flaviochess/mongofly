@@ -4,7 +4,7 @@ public enum CommandType {
 
     INSERT("insert"),
     UPDATE("update"),
-    DELETE("delete");
+    REMOVE("delete");
 
     private String value;
 

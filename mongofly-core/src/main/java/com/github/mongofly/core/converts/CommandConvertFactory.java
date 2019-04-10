@@ -1,8 +1,8 @@
-package com.github.mongofly.core.usecases.converts;
+package com.github.mongofly.core.converts;
 
 import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
-import org.apache.commons.lang3.NotImplementedException;
+import com.github.mongofly.core.utils.MongoflyException;
 import org.apache.commons.lang3.StringUtils;
 
 public class CommandConvertFactory {
@@ -10,8 +10,6 @@ public class CommandConvertFactory {
     private static final String COMMAND_PREFIX = "db.";
     private static final String DOT = ".";
     private static final String PARENTHESES_OPEN = "(";
-
-    private static final String REMOVE_TYPE = "remove";
 
     public CommandConvert factory(String command) {
 
@@ -22,9 +20,9 @@ public class CommandConvertFactory {
             case INSERT:
                 return new InsertConvert();
             case UPDATE:
-            case DELETE:
+            case REMOVE:
             default:
-                throw new NotImplementedException("Not implemented yet");
+                throw new MongoflyException("Not implemented yet");
         }
 
     }
@@ -35,10 +33,6 @@ public class CommandConvertFactory {
 
         String suffixBeforeCommandType = COMMAND_PREFIX + collectionName + DOT;
         String commandType = StringUtils.substringBetween(command, suffixBeforeCommandType, PARENTHESES_OPEN);
-
-        if (REMOVE_TYPE.equals(commandType)) {
-            return CommandType.DELETE;
-        }
 
         return CommandType.valueOf(commandType.toUpperCase());
     }
