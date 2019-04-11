@@ -4,6 +4,7 @@ import com.github.mongofly.core.domains.Mongofly;
 import com.github.mongofly.core.usecases.GetScriptFiles;
 import com.github.mongofly.core.usecases.MongoflyRepository;
 import com.github.mongofly.core.commands.RunMongoCommand;
+import com.github.mongofly.core.utils.MongoflyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -33,8 +34,6 @@ public class ExecuteScripts {
     @EventListener(ApplicationReadyEvent.class)
     public void execute() {
 
-        List<Path> scripts = getScriptFiles.get();
-
         /* confirmar se a ordenação está correta */
         getScriptFiles.get().stream()
                 .filter(this::isUnexecutedScripts)
@@ -43,28 +42,22 @@ public class ExecuteScripts {
 
     }
 
-    //TODO: o que fazer quando for um script que executou e está success false?
     private boolean isUnexecutedScripts(Path path) {
 
         String version = getFileVersion(path);
         Optional<Mongofly> execution = mongoflyRepository.findByVersion(version);
 
         log.debug("Script " + version + " executed: " + execution.isPresent());
-        return !execution.isPresent();
-    }
 
-    private String getFileName(Path path) {
-
-        return path.getFileName().toString();
+        return !execution.isPresent() || !execution.get().isSuccess();
     }
 
     private void fileProcess(Path path) {
 
-        Mongofly mongofly = new Mongofly();
-        mongofly.setScript(getFileName(path));
-        mongofly.setVersion(getFileVersion(path));
+        String version = getFileVersion(path);
+        Mongofly mongofly = mongoflyRepository.findByVersion(version).orElse(newMongofly(path));
 
-        List<String> commands = extractCommandLines(path);
+        List<String> commands = extractCommands(path);
 
         try {
 
@@ -84,12 +77,32 @@ public class ExecuteScripts {
 
         } finally {
 
-            mongoflyRepository.insert(mongofly);
+            mongoflyRepository.save(mongofly);
         }
 
     }
 
-    private List<String> extractCommandLines(Path path) {
+    private Mongofly newMongofly(Path path) {
+
+        Mongofly mongofly = new Mongofly();
+        mongofly.setScript(getFileName(path));
+        mongofly.setVersion(getFileVersion(path));
+
+        return mongofly;
+    }
+
+    private String getFileName(Path path) {
+
+        return path.getFileName().toString();
+    }
+
+    private String getFileVersion(Path path) {
+
+        String scriptName = getFileName(path);
+        return scriptName.split("__")[0].toUpperCase().replace("V", "");
+    }
+
+    private List<String> extractCommands(Path path) {
 
         List<String> commands = new ArrayList();
 
@@ -119,7 +132,7 @@ public class ExecuteScripts {
 
             if (command.length() > 0) {
 
-                throw new RuntimeException();
+                throw new MongoflyException("Command don't finish with \";\" - " + command.toString());
             }
 
         } catch (IOException ioe) {
@@ -128,12 +141,6 @@ public class ExecuteScripts {
         }
 
         return commands;
-    }
-
-    private String getFileVersion(Path path) {
-
-        String scriptName = getFileName(path);
-        return scriptName.split("__")[0].toUpperCase().replace("V", "");
     }
 
 }
