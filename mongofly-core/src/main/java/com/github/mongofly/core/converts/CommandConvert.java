@@ -12,9 +12,11 @@ public interface CommandConvert {
 
     public static final String WRITE_CONVERN = "writeConcern";
 
-    public static final char OPEN_CURLY_BRACES = '{';
+    public static final String MULTI = "multi";
 
-    public static final char CLOSE_CURLY_BRACES = '}';
+    public static final char CURLY_BRACES_OPEN = '{';
+
+    public static final char CURLY_BRACES_CLOSE = '}';
 
     public List<DBObject> convert(String command);
 }

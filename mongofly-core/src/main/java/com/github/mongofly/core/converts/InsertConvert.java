@@ -68,8 +68,8 @@ class InsertConvert implements CommandConvert {
 
     private boolean isSimpleCommand(String commandBody) {
 
-        return StringUtils.countMatches(commandBody, OPEN_CURLY_BRACES) == 1 &&
-                StringUtils.countMatches(commandBody, CLOSE_CURLY_BRACES) == 1;
+        return StringUtils.countMatches(commandBody, CURLY_BRACES_OPEN) == 1 &&
+                StringUtils.countMatches(commandBody, CURLY_BRACES_CLOSE) == 1;
     }
 
     private List<Document> convertToDocumentList(String commandBody) {
@@ -81,7 +81,7 @@ class InsertConvert implements CommandConvert {
 
         for (int positionOfLetter = 0; positionOfLetter < commandBody.length(); positionOfLetter++) {
 
-            if (commandBody.charAt(positionOfLetter) == OPEN_CURLY_BRACES) {
+            if (commandBody.charAt(positionOfLetter) == CURLY_BRACES_OPEN) {
 
                 bracesStack.push(commandBody.charAt(positionOfLetter));
 
@@ -92,7 +92,7 @@ class InsertConvert implements CommandConvert {
                 continue;
             }
 
-            if (commandBody.charAt(positionOfLetter) == CLOSE_CURLY_BRACES) {
+            if (commandBody.charAt(positionOfLetter) == CURLY_BRACES_CLOSE) {
 
                 bracesStack.pop();
 

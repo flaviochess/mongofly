@@ -20,6 +20,7 @@ public class CommandConvertFactory {
             case INSERT:
                 return new InsertConvert();
             case UPDATE:
+                return new UpdateConvert();
             case REMOVE:
             default:
                 throw new MongoflyException("Not implemented yet");

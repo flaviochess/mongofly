@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @see <a href="https://docs.mongodb.com/manual/reference/command/nav-crud/">https://docs.mongodb.com/manual/reference/command/nav-crud/</a>
  */
-public class CommandBuilder {
+public class UpdateBuilder {
 
     private static final String EMPTY = "EMPTY";
 
@@ -34,78 +34,79 @@ public class CommandBuilder {
 
     private List<Document> documents;
 
+    private Document query;
+
+    private Document update;
+
     private Boolean ordered;
 
     private String writeConcern;
 
-    private CommandBuilder(CommandType commandType, String collectionName) {
+    private Boolean multi;
+
+    private UpdateBuilder(CommandType commandType, String collectionName) {
         this.commandType = commandType;
         this.collectionName = collectionName;
         this.documents = new ArrayList();
         this.writeConcern = EMPTY;
     }
 
-    public static CommandBuilder insert(String collectionName) {
-        return new CommandBuilder(CommandType.INSERT, collectionName);
+    public static UpdateBuilder update(String collectionName) {
+        return new UpdateBuilder(CommandType.UPDATE, collectionName);
     }
 
-    public static CommandBuilder update(String collectionName) {
-        return new CommandBuilder(CommandType.UPDATE, collectionName);
-    }
-
-    public static CommandBuilder remove(String collectionName) {
-        return new CommandBuilder(CommandType.REMOVE, collectionName);
-    }
-
-    public CommandBuilder addDocument(Document document) {
-        this.documents.add(document);
+    public UpdateBuilder query(Document query) {
+        this.query = query;
         return this;
     }
 
-    public CommandBuilder addManyDocument(List<Document> documents) {
-        this.documents.addAll(documents);
+    public UpdateBuilder update(Document update) {
+        this.update = update;
         return this;
     }
 
-    public CommandBuilder ordered(boolean ordered) {
+    public UpdateBuilder ordered(boolean ordered) {
         this.ordered = ordered;
         return this;
     }
 
-    public CommandBuilder writeConcern(String writeConcern) {
+    public UpdateBuilder writeConcern(String writeConcern) {
         this.writeConcern = writeConcern;
         return this;
     }
 
-    //TODO: trocar strings por constantes
-    public DBObject build() {
+    public UpdateBuilder multi(boolean multi) {
+        this.multi = multi;
+        return this;
+    }
 
-        //não pode fazer essa verificação no update, mudar de ordem
-        if (documents.isEmpty()) {
-            throw new RuntimeException();
-        }
+    public DBObject build() {
 
         BasicDBObject dbObject = new BasicDBObject();
         dbObject.append(commandType.getValue(), collectionName);
 
+        Document updateRow =  new Document();
+        updateRow.append("q", query);
+        updateRow.append("u", update);
+
+        if (multi != null) {
+            updateRow.append("multi", multi);
+        }
+
+        documents.add(updateRow);
+
         switch (commandType) {
-            case INSERT:
-                dbObject.append("documents", documents);
-                break;
             case UPDATE:
                 dbObject.append("updates", documents);
                 break;
-            case REMOVE:
-                dbObject.append("deletes", documents);
-                break;
-        }
-
-        if (ordered != null) {
-            dbObject.append("ordered", ordered);
         }
 
         if (!EMPTY.equals(writeConcern)) {
             dbObject.append("writeConcern", writeConcern);
+        }
+
+        if (ordered != null) {
+            dbObject.append("ordered", ordered);
         }
 
         return dbObject;
