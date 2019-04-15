@@ -49,6 +49,8 @@ public class CommandBuilder {
 
     private UpdateBuilder updateBuilder;
 
+    private RemoveBuilder removeBuilder;
+
     private ExtraParametersBuilder extraParametersBuilder;
 
     private boolean extraParameters;
@@ -58,10 +60,12 @@ public class CommandBuilder {
         this.collectionName = collectionName;
         this.documents = new ArrayList();
         this.writeConcern = EMPTY;
-
         this.extraParameters = false;
+
         insertBuilder = new InsertBuilder(this);
         updateBuilder = new UpdateBuilder(this);
+        removeBuilder = new RemoveBuilder(this);
+
         extraParametersBuilder = new ExtraParametersBuilder(this);
     }
 
@@ -75,8 +79,9 @@ public class CommandBuilder {
         return commandBuilder.updateBuilder;
     }
 
-    public static CommandBuilder remove(String collectionName) {
-        return new CommandBuilder(CommandType.REMOVE, collectionName);
+    public static RemoveBuilder remove(String collectionName) {
+        CommandBuilder commandBuilder = new CommandBuilder(CommandType.REMOVE, collectionName);
+        return commandBuilder.removeBuilder;
     }
 
     public DBObject build() {
@@ -91,7 +96,7 @@ public class CommandBuilder {
                 dbObject = updateBuilder.build();
                 break;
             case REMOVE:
-                dbObject.append(REMOVE_DOCUMENTS, documents);
+                dbObject = removeBuilder.build();
                 break;
         }
 
@@ -179,12 +184,12 @@ public class CommandBuilder {
 
         private BasicDBObject build() {
 
-            BasicDBObject dbObject = new BasicDBObject();
-            dbObject.append(CommandType.UPDATE.getValue(), collectionName);
-
             if (EMPTY_DOC.equals(query) || EMPTY_DOC.equals(update)) {
                 throw new RuntimeException("Is necessary add query and update in the command.");
             }
+
+            BasicDBObject dbObject = new BasicDBObject();
+            dbObject.append(CommandType.UPDATE.getValue(), collectionName);
 
             Document updateRow =  new Document();
             updateRow.append("q", query);
@@ -193,6 +198,48 @@ public class CommandBuilder {
 
             documents.add(updateRow);
             dbObject.append(UPDATE_DOCUMENTS, documents);
+
+            return dbObject;
+        }
+
+    }
+
+    public class RemoveBuilder {
+
+        private final Document EMPTY_DOC = new Document();
+        private Document query;
+
+        private CommandBuilder parentBuilder;
+
+        private RemoveBuilder(CommandBuilder parentBuilder) {
+            this.parentBuilder = parentBuilder;
+
+            this.query = EMPTY_DOC;
+        }
+
+        public RemoveBuilder query(Document query) {
+            this.query = query;
+            return this;
+        }
+
+        public ExtraParametersBuilder extraParameters() {
+            return parentBuilder.extraParametersBuilder;
+        }
+
+        private BasicDBObject build() {
+
+            if (EMPTY_DOC.equals(query)) {
+                throw new RuntimeException("Is necessary add query in the command. If command don't has one, add a new Document.");
+            }
+
+            BasicDBObject dbObject = new BasicDBObject();
+            dbObject.append(CommandType.REMOVE.getValue(), collectionName);
+
+            Document removeRow =  new Document();
+            removeRow.append("q", query);
+
+            documents.add(removeRow);
+            dbObject.append(REMOVE_DOCUMENTS, documents);
 
             return dbObject;
         }
