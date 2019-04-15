@@ -54,26 +54,37 @@ import java.util.Optional;
  */
 public class UpdateConvert implements CommandConvert {
 
+    private static final String CURLY_BRACES_CLOSE_COMMA = "},";
+
+    private static final int COMMAND_MIN_PARTS = 2;
+
+    private static final int COMMAND_MAX_PARTS = 3;
+
+    private static final int COMMAND_QUERY_POSITION = 0;
+
+    private static final int COMMAND_UPDATE_POSITION = 1;
+
+    private static final int COMMAND_OPERATION_PARAMETERS_POSITION = 2;
+
     @Override
     public List<DBObject> convert(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
 
-        List<Document> documents;
         Optional<Document> operationParameters = Optional.empty();
 
-        String[] updateParts = commandBody.split("},");
+        String[] updateParts = commandBody.split(CURLY_BRACES_CLOSE_COMMA);
 
-        if(updateParts.length < 2 || updateParts.length > 3) {
+        if(updateParts.length < COMMAND_MIN_PARTS || updateParts.length > COMMAND_MAX_PARTS) {
             throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + commandBody);
         }
 
-        Document query = convertToDocument(updateParts[0] + "}");
-        Document update = convertToDocument(updateParts[1] + "}");
+        Document query = convertToDocument(updateParts[COMMAND_QUERY_POSITION] + CURLY_BRACES_CLOSE);
+        Document update = convertToDocument(updateParts[COMMAND_UPDATE_POSITION] + CURLY_BRACES_CLOSE);
 
-        if(updateParts.length == 3) {
-            operationParameters = Optional.of(convertToDocument(updateParts[2]));
+        if(updateParts.length == COMMAND_MAX_PARTS) {
+            operationParameters = Optional.of(convertToDocument(updateParts[COMMAND_OPERATION_PARAMETERS_POSITION]));
         }
 
         Document operation = operationParameters.orElse(new Document());
@@ -90,21 +101,21 @@ public class UpdateConvert implements CommandConvert {
 
     private DBObject buildDBObject(String collectionName, Document query, Document update, Document operationParameters) {
 
-        UpdateBuilder commandBuilder = UpdateBuilder.update(collectionName).query(query).update(update);
+        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONVERN)?
+                Optional.of(operationParameters.getString(WRITE_CONVERN)) : Optional.empty();
 
-        if (operationParameters.containsKey(WRITE_CONVERN)) {
-            commandBuilder.writeConcern(operationParameters.getString(WRITE_CONVERN));
-        }
+        Optional<Boolean> multi = operationParameters.containsKey(MULTI) ?
+                Optional.of(operationParameters.getBoolean(MULTI)) : Optional.empty();
 
-        if (operationParameters.containsKey(MULTI)) {
-            commandBuilder.multi(operationParameters.getBoolean(MULTI));
-        }
-
-        if (operationParameters.containsKey(ORDERED)) {
-            commandBuilder.ordered(operationParameters.getBoolean(ORDERED));
-        }
-
-        return commandBuilder.build();
+        return CommandBuilder
+                .update(collectionName)
+                    .query(query)
+                    .update(update)
+                    .multi(multi)
+                .extraParameters()
+                    .writeConcern(writeConcern)
+                    .done()
+                .build();
     }
 
 }

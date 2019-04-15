@@ -7,6 +7,7 @@ import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Build a mongodb operation command.
@@ -26,89 +27,226 @@ import java.util.List;
  */
 public class CommandBuilder {
 
+    private static final String INSERT_DOCUMENTS = "documents";
+
+    private static final String UPDATE_DOCUMENTS = "updates";
+
+    private static final String REMOVE_DOCUMENTS = "deletes";
+
     private static final String EMPTY = "EMPTY";
 
     private CommandType commandType;
 
     private String collectionName;
 
-    private List<Document> documents;
+    private final List<Document> documents;
 
-    private Boolean ordered;
+    private Boolean ordered = true;
 
     private String writeConcern;
+
+    private InsertBuilder insertBuilder;
+
+    private UpdateBuilder updateBuilder;
+
+    private ExtraParametersBuilder extraParametersBuilder;
+
+    private boolean extraParameters;
 
     private CommandBuilder(CommandType commandType, String collectionName) {
         this.commandType = commandType;
         this.collectionName = collectionName;
         this.documents = new ArrayList();
         this.writeConcern = EMPTY;
+
+        this.extraParameters = false;
+        insertBuilder = new InsertBuilder(this);
+        updateBuilder = new UpdateBuilder(this);
+        extraParametersBuilder = new ExtraParametersBuilder(this);
     }
 
-    public static CommandBuilder insert(String collectionName) {
-        return new CommandBuilder(CommandType.INSERT, collectionName);
+    public static InsertBuilder insert(String collectionName) {
+        CommandBuilder commandBuilder = new CommandBuilder(CommandType.INSERT, collectionName);
+        return commandBuilder.insertBuilder;
     }
 
-    public static CommandBuilder update(String collectionName) {
-        return new CommandBuilder(CommandType.UPDATE, collectionName);
+    public static UpdateBuilder update(String collectionName) {
+        CommandBuilder commandBuilder = new CommandBuilder(CommandType.UPDATE, collectionName);
+        return commandBuilder.updateBuilder;
     }
 
     public static CommandBuilder remove(String collectionName) {
         return new CommandBuilder(CommandType.REMOVE, collectionName);
     }
 
-    public CommandBuilder addDocument(Document document) {
-        this.documents.add(document);
-        return this;
-    }
-
-    public CommandBuilder addManyDocument(List<Document> documents) {
-        this.documents.addAll(documents);
-        return this;
-    }
-
-    public CommandBuilder ordered(boolean ordered) {
-        this.ordered = ordered;
-        return this;
-    }
-
-    public CommandBuilder writeConcern(String writeConcern) {
-        this.writeConcern = writeConcern;
-        return this;
-    }
-
-    //TODO: trocar strings por constantes
     public DBObject build() {
 
-        //não pode fazer essa verificação no update, mudar de ordem
-        if (documents.isEmpty()) {
-            throw new RuntimeException();
-        }
-
         BasicDBObject dbObject = new BasicDBObject();
-        dbObject.append(commandType.getValue(), collectionName);
 
         switch (commandType) {
             case INSERT:
-                dbObject.append("documents", documents);
+                dbObject = insertBuilder.build();
                 break;
             case UPDATE:
-                dbObject.append("updates", documents);
+                dbObject = updateBuilder.build();
                 break;
             case REMOVE:
-                dbObject.append("deletes", documents);
+                dbObject.append(REMOVE_DOCUMENTS, documents);
                 break;
         }
 
-        if (ordered != null) {
-            dbObject.append("ordered", ordered);
-        }
+        if (extraParameters) {
 
-        if (!EMPTY.equals(writeConcern)) {
-            dbObject.append("writeConcern", writeConcern);
+            dbObject.append(CommandConvert.ORDERED, ordered);
+
+            if (!EMPTY.equals(writeConcern)) {
+                dbObject.append(CommandConvert.WRITE_CONVERN, writeConcern);
+            }
+
         }
 
         return dbObject;
     }
 
+    public class InsertBuilder {
+
+        private CommandBuilder parentBuilder;
+
+        private InsertBuilder(CommandBuilder parentBuilder) {
+            this.parentBuilder = parentBuilder;
+        }
+
+        public InsertBuilder addManyDocument(List<Document> documents) {
+            this.parentBuilder.documents.addAll(documents);
+            return this;
+        }
+
+        public ExtraParametersBuilder extraParameters() {
+            return parentBuilder.extraParametersBuilder;
+        }
+
+        private BasicDBObject build() {
+
+            if (documents.isEmpty()) {
+                throw new RuntimeException("Is necessary add documents to insert.");
+            }
+
+            BasicDBObject dbObject = new BasicDBObject();
+
+            dbObject.append(CommandType.INSERT.getValue(), collectionName);
+            dbObject.append(INSERT_DOCUMENTS, documents);
+
+            return dbObject;
+        }
+    }
+
+    public class UpdateBuilder {
+
+        private final Document EMPTY_DOC = new Document();
+        private Document query;
+        private Document update;
+        private Boolean multi = false;
+
+        private CommandBuilder parentBuilder;
+
+        private UpdateBuilder(CommandBuilder parentBuilder) {
+            this.parentBuilder = parentBuilder;
+
+            this.query = EMPTY_DOC;
+            this.update = EMPTY_DOC;
+        }
+
+        public UpdateBuilder query(Document query) {
+            this.query = query;
+            return this;
+        }
+
+        public UpdateBuilder update(Document update) {
+            this.update = update;
+            return this;
+        }
+
+        public UpdateBuilder multi(Optional<Boolean> multi) {
+            if (multi.isPresent()) {
+                this.multi = multi.get();
+            }
+            return this;
+        }
+
+        public ExtraParametersBuilder extraParameters() {
+            return parentBuilder.extraParametersBuilder;
+        }
+
+        private BasicDBObject build() {
+
+            BasicDBObject dbObject = new BasicDBObject();
+            dbObject.append(CommandType.UPDATE.getValue(), collectionName);
+
+            if (EMPTY_DOC.equals(query) || EMPTY_DOC.equals(update)) {
+                throw new RuntimeException("Is necessary add query and update in the command.");
+            }
+
+            Document updateRow =  new Document();
+            updateRow.append("q", query);
+            updateRow.append("u", update);
+            updateRow.append("multi", multi);
+
+            documents.add(updateRow);
+            dbObject.append(UPDATE_DOCUMENTS, documents);
+
+            return dbObject;
+        }
+
+    }
+
+    public class ExtraParametersBuilder {
+
+        private CommandBuilder parentBuilder;
+
+        public ExtraParametersBuilder(CommandBuilder parentBuilder) {
+            this.parentBuilder = parentBuilder;
+        }
+
+        public ExtraParametersBuilder ordered(Optional<Boolean> ordered) {
+            if (ordered.isPresent()) {
+                this.parentBuilder.ordered = ordered.get();
+            }
+            return this;
+        }
+
+        public ExtraParametersBuilder writeConcern(Optional<String> writeConcern) {
+            if (writeConcern.isPresent()) {
+                this.parentBuilder.writeConcern = writeConcern.get();
+            }
+            return this;
+        }
+
+        public CommandBuilder done() {
+
+            if (this.parentBuilder.ordered != null ||
+                    !this.parentBuilder.writeConcern.equals(EMPTY)) {
+                this.parentBuilder.extraParameters = true;
+            }
+
+            return parentBuilder;
+        }
+
+        public CommandBuilder none() {
+            this.parentBuilder.extraParameters = false;
+            return parentBuilder;
+        }
+
+    }
+
+//    CommandBuilder.insert("users").addManyDocuments(new List()).extraParameters().order(true).done().build();
+//    CommandBuilder.insert("users").addManyDocuments(new List()).extraParameters().none().build();
+//
+//    CommandBuilder.update("users")
+//                .query(new Document())
+//                .update(new Document())
+//                .multi(true)
+//            .extraParameters()
+//                .order(true)
+//                .done()
+//            .build();
 }

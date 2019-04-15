@@ -126,16 +126,19 @@ class InsertConvert implements CommandConvert {
 
     private DBObject buildDBObject(String collectionName, List<Document> documents, Document operationParameters) {
 
-        CommandBuilder commandBuilder = CommandBuilder.insert(collectionName).addManyDocument(documents);
+        Optional<Boolean> ordered = operationParameters.containsKey(ORDERED) ?
+                Optional.of(operationParameters.getBoolean(ORDERED)) : Optional.empty();
 
-        if (operationParameters.containsKey(ORDERED)) {
-            commandBuilder.ordered(operationParameters.getBoolean(ORDERED));
-        }
+        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONVERN)?
+                Optional.of(operationParameters.getString(WRITE_CONVERN)) : Optional.empty();
 
-        if (operationParameters.containsKey(WRITE_CONVERN)) {
-            commandBuilder.writeConcern(operationParameters.getString(WRITE_CONVERN));
-        }
-
-        return commandBuilder.build();
+        return CommandBuilder
+                .insert(collectionName)
+                    .addManyDocument(documents)
+                .extraParameters()
+                    .ordered(ordered)
+                    .writeConcern(writeConcern)
+                    .done()
+                .build();
     }
 }
