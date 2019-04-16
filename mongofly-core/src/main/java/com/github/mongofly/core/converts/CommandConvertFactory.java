@@ -22,6 +22,7 @@ public class CommandConvertFactory {
             case UPDATE:
                 return new UpdateConvert();
             case REMOVE:
+                return new DeleteConvert();
             default:
                 throw new MongoflyException("Not implemented yet");
         }
