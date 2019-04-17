@@ -45,7 +45,7 @@ public class RunMongoCommand {
             if (!commandResult.ok()) {
 
                 log.debug("An error occurred while attempting to execute the command: " + convertedCommand);
-                throw new MongoflyException("An error occurred while executing" + commandResult.getErrorMessage());
+                throw new MongoflyException("An error occurred while executing: " + commandResult.getErrorMessage());
             }
 
             commandResults.add(commandResult);

@@ -5,6 +5,7 @@ public class GetCollectionNameFromCommand {
     private static final String DOT_REGEX = "\\.";
     private static final int SPLIT_LIMIT = 3;
     private static final int COLLECTION_NAME_POSITION = 1;
+
     /**
      * Returns the collection name from a valid command,
      *
