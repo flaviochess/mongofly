@@ -38,7 +38,7 @@ import java.util.Optional;
     );
 
  */
-public class DeleteConvert implements CommandConvert {
+public class RemoveConvert implements CommandConvert {
 
     @Override
     public List<DBObject> convert(String command) {

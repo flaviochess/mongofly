@@ -206,19 +206,25 @@ public class CommandBuilder {
 
     public class RemoveBuilder {
 
-        private final Document EMPTY_DOC = new Document();
         private Document query;
+        private int limit;
 
         private CommandBuilder parentBuilder;
 
         private RemoveBuilder(CommandBuilder parentBuilder) {
             this.parentBuilder = parentBuilder;
 
-            this.query = EMPTY_DOC;
+            this.query = null;
+            this.limit = 0;
         }
 
         public RemoveBuilder query(Document query) {
             this.query = query;
+            return this;
+        }
+
+        public RemoveBuilder limit(int limit) {
+            this.limit = limit;
             return this;
         }
 
@@ -228,7 +234,7 @@ public class CommandBuilder {
 
         private BasicDBObject build() {
 
-            if (EMPTY_DOC.equals(query)) {
+            if (query == null) {
                 throw new RuntimeException("Is necessary add query in the command. If command don't has one, add a new Document.");
             }
 
@@ -237,6 +243,7 @@ public class CommandBuilder {
 
             Document removeRow =  new Document();
             removeRow.append("q", query);
+            removeRow.append("limit", limit);
 
             documents.add(removeRow);
             dbObject.append(REMOVE_DOCUMENTS, documents);
