@@ -38,11 +38,11 @@ E no Gradle
 
 Para outros gerenciadores de dependencias consultar a página do projeto no JitPack: https://jitpack.io/#flaviochess/mongofly
 
-Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto, onde ficaram armazenado os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
+Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto, onde ficarão armazenado os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
 
 ## Criando os scripts
 
-Os scripts ficarão dentro da pasta `mongofly`.
+Os scripts ficarão dentro da pasta `mongofly`. A seguir as indicações de como o Mongofly espera estes arquivos.
 
 ### Formato do arquivo
 
@@ -64,7 +64,7 @@ Apenas são aceitos comandos que utilizam a nomeclatura padrão do MongoDB, as q
 
 Todo commando deve encerrar com ponto e virgula `;`.
 
-Os comandos podem ser separados dentro do arquivo por linhas em branco se assim preferir. Também é permitido usar quebras de linha em um commando para identar o mesmo, sem nenhum problema.
+Os comandos podem ser separados dentro do arquivo por linhas em branco se assim preferir. Também é permitido usar quebras de linha em um commando para identar o mesmo, não há restrições quanto a formatação dos arquivos.
 
 A seguir um exemplo de conteúdo de um arquivo válido, o arquivo se chama v1__add_users_and_change_felipe_password.json:
 
@@ -86,14 +86,14 @@ db.users.insert({
 db.users.update(
     {"login" : "Felipe"}, 
     {$set: 
-        {"password": "secret"}
+        {"password": "mudar@123"}
     }
 );
 ```
 
 ## Comandos aceitos
 
-Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não foram incluídos todas os comandos ou até mesmo parametros aceitos pelo MongoDB, mas acredito que atenda uma necessidade em geral. Na versão atual o projeto aceita basicamente insert, update e remove com algumas ressalvas quanto a parametros extras em alguns deles.
+Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não foram incluídos todos os comandos ou até mesmo parametros aceitos pelo MongoDB, mas acredito que atenda uma necessidade em geral. Na versão atual o projeto aceita basicamente insert, update e remove com algumas ressalvas quanto a parametros extras em alguns deles. Veja a seguir.
 
 ### Insert
 
@@ -101,7 +101,7 @@ Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não 
 
 Os parâmetros extras como `ordered` e `writeConcern` são aceitos.
 
-Documentação do MongoDB do Update: https://docs.mongodb.com/manual/reference/method/db.collection.insert/
+Documentação do MongoDB do Insert: https://docs.mongodb.com/manual/reference/method/db.collection.insert/
 
 ### Update
 
@@ -111,34 +111,30 @@ Os parâmetros extras `multi` e `writeConcern` são aceitos.
 
 Os parâmetros extras `upsert`, `collation` e `arrayFilters` **não** são aceitos ainda.
 
-Modificadores utilizados no meio do comando update como `$set`, `$addToSet` e `$each` não deveriam ocorrer nenhum problema, mas até o momento foi testado apenas com os três citados. Mas não existe nenhum desenvolvimento específico para estes, por isso não deveria haver problemas com outros.
+Modificadores utilizados no meio do comando update como `$set`, `$addToSet` e `$each` não deveriam causar nenhum problema, mas até o momento foi testado apenas com os três citados. De qualquer forma não existe nenhum desenvolvimento específico para estes, por isso não deveria haver problemas com outros.
 
 Documentação do MongoDB do Update: https://docs.mongodb.com/manual/reference/method/db.collection.update/
 
 ### Remove
 
-O remove não aceita **nenhum** dos parâmetros extras ainda `justOne`, `writeConcern` e `collation`.
+O remove não aceita **nenhum** dos parâmetros extras ainda, ou seja: `justOne`, `writeConcern` e `collation`.
 
+## Como funciona o Mongofly
 
-### Break down into end to end tests
-
-Explain what these tests test and why
-
-```
-Give an example
-```
-
-### And coding style tests
-
-Explain what these tests test and why
+Sempre que o projeto for inciado o Mongofly irá verificar os arquivos da pasta `mongofly` e verificar quais ainda não foram executados, olhando a *collection* também de nome `mongofly`. Ao termino da execução de cada arquivo é criado ou atualizado um documento na *collection* `mongofly` informando se o arquivo executou com sucesso ou não. Um exemplo seria:
 
 ```
-Give an example
+{
+    "version": 1,
+    "script": "v1__add_users_and_change_felipe_password.json",
+    "executedOn": "2019-04-24 16:27:21",
+    "success": true
+}
 ```
 
-## Deployment
+Se ocorrer um erro, será lançado uma exceção que interromperá o start da aplicação e inserido um documento com o campo `success` como `false`. Nestes casos é possível corrigir o script e executar a aplicação novamente. Neste momento o Mongofly irá ignorar os scritps que estão como `success = true` pois já foram executados com exito e continuará a partir do `success = false`. Caso agora o script esteja correto, o documento será atualizado para `true` e continuará a execução dos demais arquivos, se houver.
 
-Add additional notes about how to deploy this on a live system
+A *collection* `mongofly` será criada apenas após a execução do primeiro arquivo.
 
 ## Built With
 
