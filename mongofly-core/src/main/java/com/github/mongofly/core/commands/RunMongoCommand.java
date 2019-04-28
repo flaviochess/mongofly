@@ -2,8 +2,6 @@ package com.github.mongofly.core.commands;
 
 import com.github.mongofly.core.converts.CommandConvertFactory;
 import com.github.mongofly.core.utils.MongoflyException;
-import com.mongodb.CommandResult;
-import com.mongodb.DBObject;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -48,11 +44,10 @@ public class RunMongoCommand {
             convertedCommands.forEach(convertedCommand -> {
 
                 Document commandResult = mongoTemplate.executeCommand(convertedCommand);
-                if (commandResult.getDouble("ok") < 1 ||
-                        commandResult.containsKey("writeErrors")) {
+
+                if (isNotOK(commandResult)) {
 
                     log.debug("An error occurred while attempting to execute the command: " + convertedCommand);
-
                     String errorMessage = "An error occurred while executing: ";
 
                     if(commandResult.containsKey("writeErrors")) {
@@ -73,13 +68,34 @@ public class RunMongoCommand {
             throw ex;
         }
 
-        int totalInstructions = commandResults.stream().mapToInt(result -> result.getInteger("n")).sum();
-        int totalModified = commandResults.stream()
-                .mapToInt(result -> Optional.ofNullable(result.getInteger("nModified")).orElse(0))
-                .sum();
+        long totalInstructions = commandResults.stream().mapToLong(this::getNCompatibleWithAllMongoVersions).sum();
+        long totalModified = commandResults.stream().mapToLong(this::getNModifiedCompatibleWithAllMongoVersions).sum();
 
         log.debug("Number of documents selected" + totalInstructions);
         log.debug("Number of documents selected" + totalModified);
     }
 
+    private boolean isNotOK(Document commandResult) {
+
+        Double ok = getOKCompatibleWithAllMongoVersions(commandResult);
+
+        return ok < 1 || commandResult.containsKey("writeErrors");
+    }
+
+    private Double getOKCompatibleWithAllMongoVersions(Document commandResult) {
+
+        return Double.valueOf(commandResult.get("ok").toString());
+    }
+
+    private long getNCompatibleWithAllMongoVersions(Document commandResult) {
+
+        return Long.valueOf(commandResult.get("n").toString());
+    }
+
+    private long getNModifiedCompatibleWithAllMongoVersions(Document commandResult) {
+
+        Object nModified = commandResult.getOrDefault("nModified", 0);
+
+        return Long.valueOf(nModified.toString());
+    }
 }
