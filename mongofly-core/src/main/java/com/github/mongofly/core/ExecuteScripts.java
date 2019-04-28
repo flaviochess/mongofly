@@ -34,12 +34,15 @@ public class ExecuteScripts {
     @EventListener(ApplicationReadyEvent.class)
     public void execute() {
 
+        log.info("Starting Mongofly");
+
         /* confirmar se a ordenação está correta */
         getScriptFiles.get().stream()
                 .filter(this::isUnexecutedScripts)
                 .sorted(Comparator.comparing(this::getFileName))
                 .forEach(this::fileProcess);
 
+        log.info("Finish Mongofly");
     }
 
     private boolean isUnexecutedScripts(Path path) {
@@ -73,7 +76,7 @@ public class ExecuteScripts {
 
             mongofly.setExecutedOn(new Date());
             mongofly.setSuccess(false);
-            throw exception;
+            throw new MongoflyException(exception);
 
         } finally {
 
