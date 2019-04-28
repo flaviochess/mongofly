@@ -20,9 +20,8 @@ public class MongoflyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ExecuteScripts printDBData() {
+    public ExecuteScripts executeScripts() {
 
-        System.out.println("entrou");
         return new ExecuteScripts();
     }
 

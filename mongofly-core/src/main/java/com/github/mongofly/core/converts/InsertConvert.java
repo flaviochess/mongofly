@@ -4,7 +4,6 @@ import com.github.mongofly.core.utils.GetBodyFromCommand;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
 import com.github.mongofly.core.utils.MongoflyException;
 import com.google.common.collect.Lists;
-import com.mongodb.DBObject;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 class InsertConvert implements CommandConvert {
 
     @Override
-    public List<DBObject> convert(String command) {
+    public List<Document> convert(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
@@ -59,8 +58,8 @@ class InsertConvert implements CommandConvert {
         List<List<Document>> partitionedDocuments = partitionDocuments(documents);
         Document operation = operationParameters.orElse(new Document());
 
-        List<DBObject> inserts = partitionedDocuments.stream()
-                .map(docs -> this.buildDBObject(collectionName, docs, operation))
+        List<Document> inserts = partitionedDocuments.stream()
+                .map(docs -> this.buildInsertCommand(collectionName, docs, operation))
                 .collect(Collectors.toList());
 
         return inserts;
@@ -124,7 +123,7 @@ class InsertConvert implements CommandConvert {
         return Lists.partition(documents, DOCUMENTS_LIMIT_SIZE);
     }
 
-    private DBObject buildDBObject(String collectionName, List<Document> documents, Document operationParameters) {
+    private Document buildInsertCommand(String collectionName, List<Document> documents, Document operationParameters) {
 
         Optional<Boolean> ordered = operationParameters.containsKey(ORDERED) ?
                 Optional.of(operationParameters.getBoolean(ORDERED)) : Optional.empty();

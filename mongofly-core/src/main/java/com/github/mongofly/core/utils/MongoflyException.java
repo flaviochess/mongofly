@@ -10,4 +10,7 @@ public class MongoflyException extends RuntimeException {
         super(message, cause);
     }
 
+    public MongoflyException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -10,20 +10,12 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     
-    <properties>
-        <spring-boot.version>1.5.4.RELEASE</spring-boot.version>
-    </properties>
-    
     <dependencies>
-        
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-        </dependency>
-        
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
