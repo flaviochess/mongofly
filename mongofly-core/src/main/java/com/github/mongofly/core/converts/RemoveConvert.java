@@ -41,14 +41,14 @@ import java.util.Optional;
 public class RemoveConvert implements CommandConvert {
 
     @Override
-    public List<DBObject> convert(String command) {
+    public List<Document> convert(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
 
         Document query = convertToDocument(commandBody);
 
-        DBObject dbObjectRemove =
+        Document removeCommand =
                 CommandBuilder
                         .remove(collectionName)
                             .query(query)
@@ -56,7 +56,7 @@ public class RemoveConvert implements CommandConvert {
                             .none()
                         .build();
 
-        return Arrays.asList(dbObjectRemove);
+        return Arrays.asList(removeCommand);
     }
 
     private Document convertToDocument(String json) {

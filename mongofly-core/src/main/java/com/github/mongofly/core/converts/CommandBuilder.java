@@ -1,6 +1,7 @@
 package com.github.mongofly.core.converts;
 
 import com.github.mongofly.core.domains.CommandType;
+import com.github.mongofly.core.utils.MongoflyException;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.Document;
@@ -84,33 +85,33 @@ public class CommandBuilder {
         return commandBuilder.removeBuilder;
     }
 
-    public DBObject build() {
+    public Document build() {
 
-        BasicDBObject dbObject = new BasicDBObject();
+        Document command = new Document();
 
         switch (commandType) {
             case INSERT:
-                dbObject = insertBuilder.build();
+                command = insertBuilder.build();
                 break;
             case UPDATE:
-                dbObject = updateBuilder.build();
+                command = updateBuilder.build();
                 break;
             case REMOVE:
-                dbObject = removeBuilder.build();
+                command = removeBuilder.build();
                 break;
         }
 
         if (extraParameters) {
 
-            dbObject.append(CommandConvert.ORDERED, ordered);
+            command.append(CommandConvert.ORDERED, ordered);
 
             if (!EMPTY.equals(writeConcern)) {
-                dbObject.append(CommandConvert.WRITE_CONVERN, writeConcern);
+                command.append(CommandConvert.WRITE_CONVERN, writeConcern);
             }
 
         }
 
-        return dbObject;
+        return command;
     }
 
     public class InsertBuilder {
@@ -130,18 +131,18 @@ public class CommandBuilder {
             return parentBuilder.extraParametersBuilder;
         }
 
-        private BasicDBObject build() {
+        private Document build() {
 
             if (documents.isEmpty()) {
-                throw new RuntimeException("Is necessary add documents to insert.");
+                throw new MongoflyException("Is necessary add documents to insert.");
             }
 
-            BasicDBObject dbObject = new BasicDBObject();
+            Document command = new Document();
 
-            dbObject.append(CommandType.INSERT.getValue(), collectionName);
-            dbObject.append(INSERT_DOCUMENTS, documents);
+            command.append(CommandType.INSERT.getValue(), collectionName);
+            command.append(INSERT_DOCUMENTS, documents);
 
-            return dbObject;
+            return command;
         }
     }
 
@@ -157,7 +158,7 @@ public class CommandBuilder {
         private UpdateBuilder(CommandBuilder parentBuilder) {
             this.parentBuilder = parentBuilder;
 
-            this.query = EMPTY_DOC;
+            this.query = null;
             this.update = EMPTY_DOC;
         }
 
@@ -182,14 +183,14 @@ public class CommandBuilder {
             return parentBuilder.extraParametersBuilder;
         }
 
-        private BasicDBObject build() {
+        private Document build() {
 
-            if (EMPTY_DOC.equals(query) || EMPTY_DOC.equals(update)) {
-                throw new RuntimeException("Is necessary add query and update in the command.");
+            if (query == null || EMPTY_DOC.equals(update)) {
+                throw new MongoflyException("Is necessary add query and update in the command.");
             }
 
-            BasicDBObject dbObject = new BasicDBObject();
-            dbObject.append(CommandType.UPDATE.getValue(), collectionName);
+            Document command = new Document();
+            command.append(CommandType.UPDATE.getValue(), collectionName);
 
             Document updateRow =  new Document();
             updateRow.append("q", query);
@@ -197,9 +198,9 @@ public class CommandBuilder {
             updateRow.append("multi", multi);
 
             documents.add(updateRow);
-            dbObject.append(UPDATE_DOCUMENTS, documents);
+            command.append(UPDATE_DOCUMENTS, documents);
 
-            return dbObject;
+            return command;
         }
 
     }
@@ -232,23 +233,23 @@ public class CommandBuilder {
             return parentBuilder.extraParametersBuilder;
         }
 
-        private BasicDBObject build() {
+        private Document build() {
 
             if (query == null) {
-                throw new RuntimeException("Is necessary add query in the command. If command don't has one, add a new Document.");
+                throw new MongoflyException("Is necessary add query in the command. If command don't has one, add a new Document.");
             }
 
-            BasicDBObject dbObject = new BasicDBObject();
-            dbObject.append(CommandType.REMOVE.getValue(), collectionName);
+            Document command = new Document();
+            command.append(CommandType.REMOVE.getValue(), collectionName);
 
             Document removeRow =  new Document();
             removeRow.append("q", query);
             removeRow.append("limit", limit);
 
             documents.add(removeRow);
-            dbObject.append(REMOVE_DOCUMENTS, documents);
+            command.append(REMOVE_DOCUMENTS, documents);
 
-            return dbObject;
+            return command;
         }
 
     }

@@ -3,9 +3,6 @@ package com.github.mongofly.core.converts;
 import com.github.mongofly.core.utils.GetBodyFromCommand;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
 import com.github.mongofly.core.utils.MongoflyException;
-import com.google.common.collect.Lists;
-import com.mongodb.DBObject;
-import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
 import java.util.Arrays;
@@ -67,7 +64,7 @@ public class UpdateConvert implements CommandConvert {
     private static final int COMMAND_OPERATION_PARAMETERS_POSITION = 2;
 
     @Override
-    public List<DBObject> convert(String command) {
+    public List<Document> convert(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
         String commandBody = GetBodyFromCommand.get(command);
@@ -89,9 +86,9 @@ public class UpdateConvert implements CommandConvert {
 
         Document operation = operationParameters.orElse(new Document());
 
-        DBObject dbObjectUpdate = buildDBObject(collectionName, query, update, operation);
+        Document updateCommand = buildUpdateCommand(collectionName, query, update, operation);
 
-        return Arrays.asList(dbObjectUpdate);
+        return Arrays.asList(updateCommand);
     }
 
     private Document convertToDocument(String json) {
@@ -99,7 +96,7 @@ public class UpdateConvert implements CommandConvert {
         return Document.parse(json);
     }
 
-    private DBObject buildDBObject(String collectionName, Document query, Document update, Document operationParameters) {
+    private Document buildUpdateCommand(String collectionName, Document query, Document update, Document operationParameters) {
 
         Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONVERN)?
                 Optional.of(operationParameters.getString(WRITE_CONVERN)) : Optional.empty();

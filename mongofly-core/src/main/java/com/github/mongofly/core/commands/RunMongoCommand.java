@@ -5,12 +5,15 @@ import com.github.mongofly.core.utils.MongoflyException;
 import com.mongodb.CommandResult;
 import com.mongodb.DBObject;
 import lombok.extern.slf4j.Slf4j;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -36,24 +39,47 @@ public class RunMongoCommand {
             throw new MongoflyException("It's not a valid command. This does not start with \"db...\": " + command);
         }
 
-        List<DBObject> convertedCommands = commandConvertFactory.factory(command).convert(command);
+        List<Document> convertedCommands = commandConvertFactory.factory(command).convert(command);
 
-        List<CommandResult> commandResults = new ArrayList();
+        List<Document> commandResults = new ArrayList();
 
-        convertedCommands.forEach(convertedCommand -> {
-            CommandResult commandResult = mongoTemplate.executeCommand(convertedCommand);
-            if (!commandResult.ok()) {
+        try {
 
-                log.debug("An error occurred while attempting to execute the command: " + convertedCommand);
-                throw new MongoflyException("An error occurred while executing: " + commandResult.getErrorMessage());
-            }
+            convertedCommands.forEach(convertedCommand -> {
 
-            commandResults.add(commandResult);
-        });
+                Document commandResult = mongoTemplate.executeCommand(convertedCommand);
+                if (commandResult.getDouble("ok") < 1 ||
+                        commandResult.containsKey("writeErrors")) {
 
-        int totalInserts = commandResults.stream().mapToInt(result -> result.getInt("n")).sum();
+                    log.debug("An error occurred while attempting to execute the command: " + convertedCommand);
 
-        log.debug("Number of documents selected" + totalInserts);
+                    String errorMessage = "An error occurred while executing: ";
+
+                    if(commandResult.containsKey("writeErrors")) {
+                        errorMessage += ((List<Document>) commandResult.get("writeErrors")).get(0).toJson();
+                    } else {
+                        errorMessage += "Mongo returned not OK in command: " + command;
+                    }
+
+                    throw new MongoflyException(errorMessage);
+                }
+
+                commandResults.add(commandResult);
+            });
+
+        } catch (RuntimeException ex) {
+
+            log.error("Error trying to execute the command: " + command);
+            throw ex;
+        }
+
+        int totalInstructions = commandResults.stream().mapToInt(result -> result.getInteger("n")).sum();
+        int totalModified = commandResults.stream()
+                .mapToInt(result -> Optional.ofNullable(result.getInteger("nModified")).orElse(0))
+                .sum();
+
+        log.debug("Number of documents selected" + totalInstructions);
+        log.debug("Number of documents selected" + totalModified);
     }
 
 }
