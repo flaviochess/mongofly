@@ -136,15 +136,15 @@ Se ocorrer um erro, será lançado uma exceção que interromperá o start da ap
 
 A *collection* `mongofly` será criada apenas após a execução do primeiro arquivo.
 
-## Built With
+## Principais Tecnologias
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+* [Java 8](https://www.oracle.com/technetwork/pt/java/javase/downloads/jdk8-downloads-2133151.html) - Linguagem de programação
+* [Spring Boot](https://spring.io/projects/spring-boot) - Framework de desenvolvimento
+* [Maven](https://maven.apache.org/) - Gerenciador de dependencias
 
-## Contributing
+## Contribuição
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+Para contribuir com este projeto por favor leio o [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) para mais detalhes de como o projeto está estruturado, do nosso código de conduta e os processos de como nos enviar pull requests.
 
 ## Versioning
 
