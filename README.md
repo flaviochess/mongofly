@@ -8,6 +8,9 @@ Atualmente o projeto encontra-se apenas no repositório JitPack e funciona apena
 
 ### Pré requisitos
 
+* Spring Boot 2.x
+* Spring Data MongoDB
+
 Esse starter utiliza o MongoDB já configurado no projeto para executar os scripts. Por isso é necessário que você já tenha configurado o Spring Data MongoDB no projeto informando qual é o banco e outras informações que forem relevantes ao seu projeto.
 
 ### Configurando o Mongofly em seu projeto
@@ -36,9 +39,9 @@ E no Gradle
 	}
 ```
 
-Para outros gerenciadores de dependencias consultar a página do projeto no JitPack: https://jitpack.io/#flaviochess/mongofly
+Para outros gerenciadores de dependencias consultar a página do projeto no JitPack: [https://jitpack.io/mongofly](https://jitpack.io/#flaviochess/mongofly)
 
-Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto, onde ficarão armazenado os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
+Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto, onde ficarão armazenado os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection também chamada `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
 
 ## Criando os scripts
 
