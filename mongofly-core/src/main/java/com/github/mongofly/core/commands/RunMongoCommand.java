@@ -35,6 +35,8 @@ public class RunMongoCommand {
             throw new MongoflyException("It's not a valid command. This does not start with \"db...\": " + command);
         }
 
+        mongoTemplate.getDb().getCollection("").insertMany();
+
         List<Document> convertedCommands = commandConvertFactory.factory(command).convert(command);
 
         List<Document> commandResults = new ArrayList();

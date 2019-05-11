@@ -10,7 +10,7 @@ public interface CommandConvert {
 
     String ORDERED = "ordered";
 
-    String WRITE_CONVERN = "writeConcern";
+    String WRITE_CONCERN = "writeConcern";
 
     String MULTI = "multi";
 

@@ -98,8 +98,8 @@ public class UpdateConvert implements CommandConvert {
 
     private Document buildUpdateCommand(String collectionName, Document query, Document update, Document operationParameters) {
 
-        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONVERN)?
-                Optional.of(operationParameters.getString(WRITE_CONVERN)) : Optional.empty();
+        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONCERN)?
+                Optional.of(operationParameters.getString(WRITE_CONCERN)) : Optional.empty();
 
         Optional<Boolean> multi = operationParameters.containsKey(MULTI) ?
                 Optional.of(operationParameters.getBoolean(MULTI)) : Optional.empty();

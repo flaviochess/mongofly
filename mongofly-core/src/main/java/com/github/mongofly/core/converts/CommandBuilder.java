@@ -2,8 +2,6 @@ package com.github.mongofly.core.converts;
 
 import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.MongoflyException;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -106,7 +104,7 @@ public class CommandBuilder {
             command.append(CommandConvert.ORDERED, ordered);
 
             if (!EMPTY.equals(writeConcern)) {
-                command.append(CommandConvert.WRITE_CONVERN, writeConcern);
+                command.append(CommandConvert.WRITE_CONCERN, writeConcern);
             }
 
         }

@@ -4,6 +4,8 @@ import com.github.mongofly.core.utils.GetBodyFromCommand;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
 import com.github.mongofly.core.utils.MongoflyException;
 import com.google.common.collect.Lists;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.model.InsertManyOptions;
 import org.apache.commons.lang3.StringUtils;
 import org.bson.Document;
 
@@ -31,7 +33,8 @@ class InsertConvert implements CommandConvert {
         String commandBody = GetBodyFromCommand.get(command);
 
         List<Document> documents;
-        Optional<Document> operationParameters = Optional.empty();
+        Optional<InsertManyOptions> insertManyOptions = Optional.empty();
+        Optional<WriteConcern> writeConcern = Optional.empty();
 
         if (isSimpleCommand(commandBody)) {
 
@@ -46,9 +49,16 @@ class InsertConvert implements CommandConvert {
                 Document lastDocument = documents.get(documents.size() - 1);
 
                 if (lastDocument.containsKey(ORDERED) ||
-                        lastDocument.containsKey(WRITE_CONVERN)) {
+                        lastDocument.containsKey(WRITE_CONCERN)) {
 
-                    operationParameters = Optional.of(lastDocument);
+                    if (lastDocument.containsKey(ORDERED)) {
+                        insertManyOptions = Optional.of(convertOptions(lastDocument));
+                    }
+
+                    if (lastDocument.containsKey(WRITE_CONCERN)) {
+                        writeConcern = Optional.of(convertWriteConcern(lastDocument));
+                    }
+
                     documents.remove(documents.size() - 1);
                 }
             }
@@ -128,8 +138,8 @@ class InsertConvert implements CommandConvert {
         Optional<Boolean> ordered = operationParameters.containsKey(ORDERED) ?
                 Optional.of(operationParameters.getBoolean(ORDERED)) : Optional.empty();
 
-        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONVERN)?
-                Optional.of(operationParameters.getString(WRITE_CONVERN)) : Optional.empty();
+        Optional<String> writeConcern = operationParameters.containsKey(WRITE_CONCERN)?
+                Optional.of(operationParameters.getString(WRITE_CONCERN)) : Optional.empty();
 
         return CommandBuilder
                 .insert(collectionName)
@@ -140,4 +150,55 @@ class InsertConvert implements CommandConvert {
                     .done()
                 .build();
     }
+
+    private InsertManyOptions convertOptions(Document options) {
+
+        InsertManyOptions insertManyOptions = new InsertManyOptions();
+
+        if(options.containsKey("ordered")) {
+
+            Boolean ordered = true;
+
+            try{
+                ordered = options.getBoolean("ordered");
+
+            } catch (ClassCastException cce) {
+
+                Integer orderedInt = options.getInteger("ordered");
+                ordered = orderedInt == 0? Boolean.FALSE : Boolean.TRUE;
+
+            }
+
+            insertManyOptions.ordered(ordered);
+
+        }
+
+        return insertManyOptions;
+    }
+
+    private WriteConcern convertWriteConcern(Document writeConcern) {
+
+        OptionalInt w = OptionalInt.empty();
+        OptionalInt wTimeoutMS = OptionalInt.empty();
+
+        if(writeConcern.containsKey("w")) {
+            w = OptionalInt.of(writeConcern.getInteger("w"));
+
+            if(writeConcern.containsKey("wtimeout")) {
+                wTimeoutMS = OptionalInt.of(writeConcern.getInteger("wtimeout"));
+            }
+        }
+
+        if(w.isPresent()) {
+
+            if(wTimeoutMS.isPresent()) {
+                return new WriteConcern(w.getAsInt(), wTimeoutMS.getAsInt());
+            } else {
+                return new WriteConcern(w.getAsInt());
+            }
+        }
+
+        throw new MongoflyException("");
+    }
+
 }
