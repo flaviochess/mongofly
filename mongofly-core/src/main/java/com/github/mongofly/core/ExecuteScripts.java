@@ -1,12 +1,13 @@
 package com.github.mongofly.core;
 
+import com.github.mongofly.core.commands.RunCommandFactory;
+import com.github.mongofly.core.commands.RunMongoCommand;
 import com.github.mongofly.core.domains.Mongofly;
 import com.github.mongofly.core.usecases.GetScriptFiles;
 import com.github.mongofly.core.usecases.MongoflyRepository;
-import com.github.mongofly.core.commands.RunMongoCommand;
 import com.github.mongofly.core.utils.MongoflyException;
+import com.mongodb.client.MongoDatabase;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -22,21 +23,31 @@ import java.util.*;
 @Component
 public class ExecuteScripts {
 
-    @Autowired
     private GetScriptFiles getScriptFiles;
 
-    @Autowired
     private MongoflyRepository mongoflyRepository;
 
-    @Autowired
+    private MongoDatabase mongoDatabase;
+
+    private RunCommandFactory runCommandFactory;
+
     private RunMongoCommand runMongoCommand;
+
+    public ExecuteScripts(MongoDatabase mongoDatabase, MongoflyRepository mongoflyRepository, GetScriptFiles getScriptFiles) {
+
+        this.mongoDatabase = mongoDatabase;
+        this.mongoflyRepository = mongoflyRepository;
+        this.getScriptFiles = getScriptFiles;
+
+        this.runCommandFactory = new RunCommandFactory(this.mongoDatabase);
+        this.runMongoCommand = new RunMongoCommand(runCommandFactory);
+    }
 
     @EventListener(ApplicationReadyEvent.class)
     public void execute() {
 
         log.info("Starting Mongofly");
 
-        /* confirmar se a ordenação está correta */
         getScriptFiles.get().stream()
                 .filter(this::isUnexecutedScripts)
                 .sorted(Comparator.comparing(this::getFileName))

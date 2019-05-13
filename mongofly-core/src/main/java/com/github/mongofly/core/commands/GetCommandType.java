@@ -1,35 +1,16 @@
-package com.github.mongofly.core.converts;
+package com.github.mongofly.core.commands;
 
 import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
-import com.github.mongofly.core.utils.MongoflyException;
 import org.apache.commons.lang3.StringUtils;
 
-public class CommandConvertFactory {
+public class GetCommandType {
 
     private static final String COMMAND_PREFIX = "db.";
     private static final String DOT = ".";
     private static final String PARENTHESES_OPEN = "(";
 
-    public CommandConvert factory(String command) {
-
-        CommandType commandType = getCommandType(command);
-
-        switch (commandType) {
-
-            case INSERT:
-                return new InsertConvert();
-            case UPDATE:
-                return new UpdateConvert();
-            case REMOVE:
-                return new RemoveConvert();
-            default:
-                throw new MongoflyException("Not implemented yet");
-        }
-
-    }
-
-    private CommandType getCommandType(String command) {
+    public static CommandType fromCommand(String command) {
 
         String collectionName = GetCollectionNameFromCommand.get(command);
 
@@ -38,5 +19,4 @@ public class CommandConvertFactory {
 
         return CommandType.valueOf(commandType.toUpperCase());
     }
-
 }
