@@ -1,15 +1,17 @@
 package com.github.mongofly.core.commands.remove;
 
 import com.github.mongofly.core.commands.ConvertCommandBody;
-import com.github.mongofly.core.converts.CommandBuilder;
-import com.github.mongofly.core.converts.CommandConvert;
+import com.github.mongofly.core.commands.GetCommandType;
+import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.GetBodyFromCommand;
-import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
+import com.github.mongofly.core.utils.GetCollation;
+import com.github.mongofly.core.utils.GetWriteConcern;
 import com.github.mongofly.core.utils.MongoflyException;
-import com.mongodb.DBObject;
+import com.mongodb.WriteConcern;
+import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.DeleteOptions;
 import org.bson.Document;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,40 +43,76 @@ import java.util.Optional;
     );
 
  */
-public class RemoveConvert implements CommandConvert {
-
-    private static final String CURLY_BRACES_CLOSE_COMMA = "},";
+public class RemoveConvert {
 
     private static final int COMMAND_MIN_PARTS = 1;
 
     private static final int COMMAND_MAX_PARTS = 2;
 
-    @Override
-    public List<Document> convert(String command) {
+    private static final int COMMAND_QUERY_POSITION = 0;
 
-        String collectionName = GetCollectionNameFromCommand.get(command);
+    private static final int COMMAND_OPERATION_PARAMETERS_POSITION = 1;
+
+    private static final String JUST_ONE = "justOne";
+
+    public static Delete convert(String command) {
+
         String commandBody = GetBodyFromCommand.get(command);
 
         List<Document> deleteParts = ConvertCommandBody.toDocumentList(commandBody);
 
-        //continue
+        if(deleteParts.size() < COMMAND_MIN_PARTS || deleteParts.size() > COMMAND_MAX_PARTS) {
+            throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + command);
+        }
 
-        Document query = convertToDocument(commandBody);
+        Document query = deleteParts.get(COMMAND_QUERY_POSITION);
 
-        Document removeCommand =
-                CommandBuilder
-                        .remove(collectionName)
-                            .query(query)
-                        .extraParameters()
-                            .none()
-                        .build();
+        Optional<DeleteOptions> deleteOptions = Optional.empty();
+        Optional<WriteConcern> writeConcern = Optional.empty();
 
-        return Arrays.asList(removeCommand);
+        if(deleteParts.size() == COMMAND_MAX_PARTS) {
+
+            Document options = deleteParts.get(COMMAND_OPERATION_PARAMETERS_POSITION);
+
+            if(options.containsKey("collation")) {
+                DeleteOptions opts = new DeleteOptions();
+                opts.collation(GetCollation.get(options).orElse(Collation.builder().build()));
+                deleteOptions = Optional.of(new DeleteOptions());
+            }
+
+            writeConcern = GetWriteConcern.get(options);
+        }
+
+        Boolean justOne = isJustOne(command, deleteParts);
+
+        return new Delete(query, deleteOptions, writeConcern, justOne);
     }
 
-    private Document convertToDocument(String json) {
 
-        return Document.parse(json);
+    private static Boolean isJustOne(String command, List<Document> deleteParts) {
+
+        if(CommandType.REMOVE.equals(GetCommandType.fromCommand(command))) {
+
+            if (deleteParts.size() < COMMAND_MAX_PARTS) {
+                return Boolean.FALSE;
+            }
+
+            Document options = deleteParts.get(COMMAND_OPERATION_PARAMETERS_POSITION);
+
+            if(options.containsKey(JUST_ONE)) {
+
+                return options.getBoolean(JUST_ONE);
+            }
+
+            return Boolean.FALSE;
+        }
+
+        if(CommandType.DELETE_ONE.equals(GetCommandType.fromCommand(command))) {
+
+            return Boolean.TRUE;
+        }
+
+        return Boolean.FALSE;
+
     }
-
 }

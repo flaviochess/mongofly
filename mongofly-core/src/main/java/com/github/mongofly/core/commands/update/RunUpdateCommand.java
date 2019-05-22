@@ -50,3 +50,5 @@ public class RunUpdateCommand implements RunCommand {
     }
 
 }
+
+// se o $in realmente não funcionar executar o commando runCommand do drive com o código no formato antigo

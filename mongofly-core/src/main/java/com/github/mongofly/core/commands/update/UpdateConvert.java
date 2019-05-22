@@ -4,6 +4,7 @@ import com.github.mongofly.core.commands.ConvertCommandBody;
 import com.github.mongofly.core.commands.GetCommandType;
 import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.GetBodyFromCommand;
+import com.github.mongofly.core.utils.GetCollation;
 import com.github.mongofly.core.utils.GetWriteConcern;
 import com.github.mongofly.core.utils.MongoflyException;
 import com.mongodb.WriteConcern;
@@ -74,7 +75,7 @@ public class UpdateConvert {
         List<Document> updateParts = ConvertCommandBody.toDocumentList(commandBody);
 
         if(updateParts.size() < COMMAND_MIN_PARTS || updateParts.size() > COMMAND_MAX_PARTS) {
-            throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + commandBody);
+            throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + command);
         }
 
         Document query = updateParts.get(COMMAND_QUERY_POSITION);
@@ -111,7 +112,7 @@ public class UpdateConvert {
         }
 
         if(options.containsKey("collation")) {
-            updateOptions.collation(convertCollation(options.get("collation", Document.class)));
+            updateOptions.collation(GetCollation.get(options).orElse(Collation.builder().build()));
         }
 
         if(options.containsKey("arrayFilters")) {
@@ -126,54 +127,6 @@ public class UpdateConvert {
 
         return options.containsKey("upset") || options.containsKey("collation")  ||
                 options.containsKey("arrayFilters") ;
-    }
-
-    private static Collation convertCollation(Document collation) {
-
-        Collation.Builder builder = Collation.builder();
-
-        if(collation.containsKey("locale")) {
-            builder.locale(collation.getString("locale"));
-        }
-
-        if(collation.containsKey("caseLevel")) {
-            builder.caseLevel(collation.getBoolean("caseLevel"));
-        }
-
-        if(collation.containsKey("caseFirst")) {
-            builder.collationCaseFirst(CollationCaseFirst.fromString(collation.getString("caseFirst")));
-        }
-
-        if(collation.containsKey("strength")) {
-            builder.collationStrength(CollationStrength.fromInt(collation.getInteger("strength")));
-        }
-
-        if(collation.containsKey("numericOrdering")) {
-            builder.numericOrdering(collation.getBoolean("numericOrdering"));
-        }
-
-        if(collation.containsKey("alternate")) {
-            builder.collationAlternate(CollationAlternate.fromString(collation.getString("alternate")));
-        }
-
-        if(collation.containsKey("maxVariable")) {
-            builder.collationMaxVariable(CollationMaxVariable.fromString(collation.getString("maxVariable")));
-        }
-
-        if(collation.containsKey("normalization")) {
-            builder.normalization(collation.getBoolean("normalization"));
-        }
-
-        if(collation.containsKey("backwards")) {
-            builder.backwards(collation.getBoolean("backwards"));
-        }
-
-        return builder.build();
-    }
-
-    private static Document convertToDocument(String json) {
-
-        return Document.parse(json);
     }
 
     private static Boolean isMulti(String command, List<Document> updateParts) {

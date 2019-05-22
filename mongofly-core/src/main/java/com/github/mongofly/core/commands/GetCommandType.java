@@ -17,6 +17,7 @@ public class GetCommandType {
         String suffixBeforeCommandType = COMMAND_PREFIX + collectionName + DOT;
         String commandType = StringUtils.substringBetween(command, suffixBeforeCommandType, PARENTHESES_OPEN);
 
-        return CommandType.valueOf(commandType.toUpperCase());
+        return CommandType.fromValue(commandType);
     }
+
 }

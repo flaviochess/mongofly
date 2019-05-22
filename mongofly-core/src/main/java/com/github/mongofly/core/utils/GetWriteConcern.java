@@ -10,11 +10,13 @@ import static com.github.mongofly.core.converts.CommandConvert.WRITE_CONCERN;
 
 public class GetWriteConcern {
 
-    public static Optional<WriteConcern> get(Document writeConcern) {
+    public static Optional<WriteConcern> get(Document options) {
 
-        if(!isWriteConcern(writeConcern)) {
+        if(!isWriteConcern(options)) {
             return Optional.empty();
         }
+
+        Document writeConcern = options.get("writeConcern", Document.class);
 
         return Optional.of(convertWriteConcern(writeConcern));
     }

@@ -1,6 +1,7 @@
 package com.github.mongofly.core.commands;
 
 import com.github.mongofly.core.commands.insert.RunInsertCommand;
+import com.github.mongofly.core.commands.remove.RunDeleteCommand;
 import com.github.mongofly.core.commands.update.RunUpdateCommand;
 import com.github.mongofly.core.domains.CommandType;
 import com.github.mongofly.core.utils.MongoflyException;
@@ -10,6 +11,7 @@ public class RunCommandFactory {
 
     private RunInsertCommand runInsertCommand;
     private RunUpdateCommand runUpdateCommand;
+    private RunDeleteCommand runDeleteCommand;
 
     private MongoDatabase db;
 
@@ -39,6 +41,12 @@ public class RunCommandFactory {
                 }
                 return runUpdateCommand;
             case REMOVE:
+            case DELETE_ONE:
+            case DELETE_MANY:
+                if (runDeleteCommand == null) {
+                    runDeleteCommand = new RunDeleteCommand(db);
+                }
+                return runDeleteCommand;
             default:
                 throw new MongoflyException("Not implemented yet");
         }
