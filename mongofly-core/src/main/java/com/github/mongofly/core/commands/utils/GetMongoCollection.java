@@ -1,4 +1,4 @@
-package com.github.mongofly.core.commands;
+package com.github.mongofly.core.commands.utils;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoCollection;

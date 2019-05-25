@@ -1,8 +1,8 @@
 package com.github.mongofly.core.commands.insert;
 
-import com.github.mongofly.core.commands.GetMongoCollection;
+import com.github.mongofly.core.commands.utils.GetMongoCollection;
 import com.github.mongofly.core.commands.RunCommand;
-import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
+import com.github.mongofly.core.commands.utils.GetCollectionNameFromCommand;
 import com.google.common.collect.Lists;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -11,9 +11,9 @@ import org.bson.Document;
 
 import java.util.List;
 
-import static com.github.mongofly.core.converts.CommandConvert.DOCUMENTS_LIMIT_SIZE;
-
 public class RunInsertCommand implements RunCommand {
+
+    private static final int DOCUMENTS_LIMIT_SIZE = 1000;
 
     private MongoDatabase db;
 

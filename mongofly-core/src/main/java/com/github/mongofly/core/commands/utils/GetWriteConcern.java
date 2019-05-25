@@ -1,14 +1,17 @@
-package com.github.mongofly.core.utils;
+package com.github.mongofly.core.commands.utils;
 
+import com.github.mongofly.core.exceptions.MongoflyException;
 import com.mongodb.WriteConcern;
 import org.bson.Document;
 
 import java.util.Optional;
 import java.util.OptionalInt;
 
-import static com.github.mongofly.core.converts.CommandConvert.WRITE_CONCERN;
-
 public class GetWriteConcern {
+
+    public static final String WRITE_CONCERN = "writeConcern";
+    public static final String W_PARAM = "w";
+    public static final String W_TIMEOUT = "wtimeout";
 
     public static Optional<WriteConcern> get(Document options) {
 
@@ -30,11 +33,11 @@ public class GetWriteConcern {
         OptionalInt w = OptionalInt.empty();
         OptionalInt wTimeoutMS = OptionalInt.empty();
 
-        if(writeConcern.containsKey("w")) {
-            w = OptionalInt.of(writeConcern.getInteger("w"));
+        if(writeConcern.containsKey(W_PARAM)) {
+            w = OptionalInt.of(writeConcern.getInteger(W_PARAM));
 
-            if(writeConcern.containsKey("wtimeout")) {
-                wTimeoutMS = OptionalInt.of(writeConcern.getInteger("wtimeout"));
+            if(writeConcern.containsKey(W_TIMEOUT)) {
+                wTimeoutMS = OptionalInt.of(writeConcern.getInteger(W_TIMEOUT));
             }
         }
 
@@ -47,6 +50,6 @@ public class GetWriteConcern {
             }
         }
 
-        throw new MongoflyException("");
+        throw new MongoflyException("Invalid writeConcern, w parameter not found");
     }
 }

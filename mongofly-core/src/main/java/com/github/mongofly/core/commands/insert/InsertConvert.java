@@ -1,8 +1,8 @@
 package com.github.mongofly.core.commands.insert;
 
-import com.github.mongofly.core.commands.ConvertCommandBody;
-import com.github.mongofly.core.utils.GetBodyFromCommand;
-import com.github.mongofly.core.utils.GetWriteConcern;
+import com.github.mongofly.core.commands.utils.ConvertCommandBody;
+import com.github.mongofly.core.commands.utils.GetBodyFromCommand;
+import com.github.mongofly.core.commands.utils.GetWriteConcern;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.InsertManyOptions;
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +12,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.github.mongofly.core.converts.CommandConvert.*;
+import static com.github.mongofly.core.commands.utils.ConvertCommandBody.CURLY_BRACES_CLOSE;
+import static com.github.mongofly.core.commands.utils.ConvertCommandBody.CURLY_BRACES_OPEN;
+import static com.github.mongofly.core.commands.utils.GetWriteConcern.WRITE_CONCERN;
 
 /*
     TODO:
@@ -26,6 +28,8 @@ import static com.github.mongofly.core.converts.CommandConvert.*;
      */
 
 public class InsertConvert {
+
+    private static final String ORDERED = "ordered";
 
     public static InsertObject convert(String command) {
 
@@ -87,16 +91,16 @@ public class InsertConvert {
 
         InsertManyOptions insertManyOptions = new InsertManyOptions();
 
-        if(options.containsKey("ordered")) {
+        if(options.containsKey(ORDERED)) {
 
-            Boolean ordered = true;
+            Boolean ordered;
 
             try{
-                ordered = options.getBoolean("ordered");
+                ordered = options.getBoolean(ORDERED);
 
             } catch (ClassCastException cce) {
 
-                Integer orderedInt = options.getInteger("ordered");
+                Integer orderedInt = options.getInteger(ORDERED);
                 ordered = orderedInt == 0? Boolean.FALSE : Boolean.TRUE;
 
             }

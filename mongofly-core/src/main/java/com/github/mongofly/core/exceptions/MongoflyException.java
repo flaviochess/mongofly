@@ -1,4 +1,4 @@
-package com.github.mongofly.core.utils;
+package com.github.mongofly.core.exceptions;
 
 public class MongoflyException extends RuntimeException {
 

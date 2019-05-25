@@ -1,7 +1,6 @@
-package com.github.mongofly.core.commands;
+package com.github.mongofly.core.commands.utils;
 
 import com.github.mongofly.core.domains.CommandType;
-import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
 import org.apache.commons.lang3.StringUtils;
 
 public class GetCommandType {

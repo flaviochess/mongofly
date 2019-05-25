@@ -1,12 +1,8 @@
 package com.github.mongofly.core.commands.remove;
 
-import com.github.mongofly.core.commands.ConvertCommandBody;
-import com.github.mongofly.core.commands.GetCommandType;
+import com.github.mongofly.core.commands.utils.*;
 import com.github.mongofly.core.domains.CommandType;
-import com.github.mongofly.core.utils.GetBodyFromCommand;
-import com.github.mongofly.core.utils.GetCollation;
-import com.github.mongofly.core.utils.GetWriteConcern;
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.DeleteOptions;

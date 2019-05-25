@@ -1,8 +1,8 @@
 package com.github.mongofly.autoconfigure;
 
 import com.github.mongofly.core.ExecuteScripts;
-import com.github.mongofly.core.usecases.GetScriptFiles;
-import com.github.mongofly.core.usecases.MongoflyRepository;
+import com.github.mongofly.core.scripts.GetScriptFiles;
+import com.github.mongofly.core.domains.MongoflyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;

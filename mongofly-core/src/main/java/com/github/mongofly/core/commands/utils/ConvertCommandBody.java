@@ -1,16 +1,17 @@
-package com.github.mongofly.core.commands;
+package com.github.mongofly.core.commands.utils;
 
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import static com.github.mongofly.core.converts.CommandConvert.CURLY_BRACES_CLOSE;
-import static com.github.mongofly.core.converts.CommandConvert.CURLY_BRACES_OPEN;
-
 public class ConvertCommandBody {
+
+    public static final char CURLY_BRACES_OPEN = '{';
+
+    public static final char CURLY_BRACES_CLOSE = '}';
 
     public static List<Document> toDocumentList(String commandBody) {
 

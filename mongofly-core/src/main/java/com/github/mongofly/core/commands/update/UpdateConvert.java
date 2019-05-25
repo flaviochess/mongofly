@@ -1,20 +1,15 @@
 package com.github.mongofly.core.commands.update;
 
-import com.github.mongofly.core.commands.ConvertCommandBody;
-import com.github.mongofly.core.commands.GetCommandType;
+import com.github.mongofly.core.commands.utils.*;
 import com.github.mongofly.core.domains.CommandType;
-import com.github.mongofly.core.utils.GetBodyFromCommand;
-import com.github.mongofly.core.utils.GetCollation;
-import com.github.mongofly.core.utils.GetWriteConcern;
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 import com.mongodb.WriteConcern;
-import com.mongodb.client.model.*;
+import com.mongodb.client.model.Collation;
+import com.mongodb.client.model.UpdateOptions;
 import org.bson.Document;
 
 import java.util.List;
 import java.util.Optional;
-
-import static com.github.mongofly.core.converts.CommandConvert.MULTI;
 
 /*
     Samples:
@@ -58,6 +53,14 @@ import static com.github.mongofly.core.converts.CommandConvert.MULTI;
  */
 public class UpdateConvert {
 
+    private static final String MULTI = "multi";
+
+    private static final String UPSERT = "upsert";
+
+    private static final String COLLATION = "collation";
+
+    private static final String ARRAY_FILTERS = "arrayFilters";
+
     private static final int COMMAND_MIN_PARTS = 2;
 
     private static final int COMMAND_MAX_PARTS = 3;
@@ -75,6 +78,7 @@ public class UpdateConvert {
         List<Document> updateParts = ConvertCommandBody.toDocumentList(commandBody);
 
         if(updateParts.size() < COMMAND_MIN_PARTS || updateParts.size() > COMMAND_MAX_PARTS) {
+
             throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + command);
         }
 
@@ -107,16 +111,16 @@ public class UpdateConvert {
 
         UpdateOptions updateOptions = new UpdateOptions();
 
-        if (options.containsKey("upsert")) {
-            updateOptions.upsert(options.getBoolean("upsert"));
+        if (options.containsKey(UPSERT)) {
+            updateOptions.upsert(options.getBoolean(UPSERT));
         }
 
-        if(options.containsKey("collation")) {
+        if(options.containsKey(COLLATION)) {
             updateOptions.collation(GetCollation.get(options).orElse(Collation.builder().build()));
         }
 
-        if(options.containsKey("arrayFilters")) {
-            updateOptions.arrayFilters(options.get("arrayFilters", List.class));
+        if(options.containsKey(ARRAY_FILTERS)) {
+            updateOptions.arrayFilters(options.get(ARRAY_FILTERS, List.class));
         }
 
         return Optional.of(updateOptions);
@@ -125,8 +129,8 @@ public class UpdateConvert {
 
     private static boolean isOptionsParameters(Document options) {
 
-        return options.containsKey("upset") || options.containsKey("collation")  ||
-                options.containsKey("arrayFilters") ;
+        return options.containsKey(UPSERT) || options.containsKey(COLLATION)  ||
+                options.containsKey(ARRAY_FILTERS) ;
     }
 
     private static Boolean isMulti(String command, List<Document> updateParts) {

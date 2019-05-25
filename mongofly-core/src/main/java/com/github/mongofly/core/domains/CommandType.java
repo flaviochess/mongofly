@@ -1,9 +1,8 @@
 package com.github.mongofly.core.domains;
 
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 
 import java.util.Arrays;
-import java.util.Optional;
 
 public enum CommandType {
 

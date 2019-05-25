@@ -1,6 +1,6 @@
 package com.github.mongofly.core.commands;
 
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 

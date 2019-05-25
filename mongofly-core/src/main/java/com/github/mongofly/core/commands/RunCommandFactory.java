@@ -3,8 +3,9 @@ package com.github.mongofly.core.commands;
 import com.github.mongofly.core.commands.insert.RunInsertCommand;
 import com.github.mongofly.core.commands.remove.RunDeleteCommand;
 import com.github.mongofly.core.commands.update.RunUpdateCommand;
+import com.github.mongofly.core.commands.utils.GetCommandType;
 import com.github.mongofly.core.domains.CommandType;
-import com.github.mongofly.core.utils.MongoflyException;
+import com.github.mongofly.core.exceptions.MongoflyException;
 import com.mongodb.client.MongoDatabase;
 
 public class RunCommandFactory {

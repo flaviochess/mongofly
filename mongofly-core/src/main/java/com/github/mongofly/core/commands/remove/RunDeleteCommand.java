@@ -1,8 +1,8 @@
 package com.github.mongofly.core.commands.remove;
 
-import com.github.mongofly.core.commands.GetMongoCollection;
+import com.github.mongofly.core.commands.utils.GetMongoCollection;
 import com.github.mongofly.core.commands.RunCommand;
-import com.github.mongofly.core.utils.GetCollectionNameFromCommand;
+import com.github.mongofly.core.commands.utils.GetCollectionNameFromCommand;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
