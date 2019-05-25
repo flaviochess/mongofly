@@ -1,6 +1,5 @@
-package com.github.mongofly.core.usecases;
+package com.github.mongofly.core.domains;
 
-import com.github.mongofly.core.domains.Mongofly;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

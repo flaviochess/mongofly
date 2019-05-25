@@ -1,10 +1,8 @@
 package com.github.mongofly.autoconfigure;
 
 import com.github.mongofly.core.ExecuteScripts;
-import com.github.mongofly.core.usecases.GetScriptFiles;
-import com.github.mongofly.core.usecases.MongoflyRepository;
-import com.github.mongofly.core.commands.RunMongoCommand;
-import com.github.mongofly.core.converts.CommandConvertFactory;
+import com.github.mongofly.core.scripts.GetScriptFiles;
+import com.github.mongofly.core.domains.MongoflyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -20,30 +18,9 @@ public class MongoflyAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public ExecuteScripts executeScripts() {
-
-        return new ExecuteScripts();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
     public GetScriptFiles getScriptFiles() {
 
         return new GetScriptFiles();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public CommandConvertFactory commandConvertFactory() {
-
-        return new CommandConvertFactory();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public RunMongoCommand runMongoCommand(CommandConvertFactory commandConvertFactory, MongoTemplate mongoTemplate) {
-
-        return new RunMongoCommand(commandConvertFactory, mongoTemplate);
     }
 
     @Bean
@@ -53,4 +30,10 @@ public class MongoflyAutoConfiguration {
         return new MongoRepositoryFactory(mongoTemplate).getRepository(MongoflyRepository.class);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ExecuteScripts executeScripts() {
+
+        return new ExecuteScripts(mongoTemplate.getDb(), mongoflyRepository(), getScriptFiles());
+    }
 }
