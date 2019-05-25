@@ -17,7 +17,7 @@ public class ConvertCommandBody {
         List<Document> documents = new ArrayList();
 
         Stack<Character> bracesStack = new Stack();
-        int firstBraceOfJson = 0;
+        int firstBraceOfJson = -1;
 
         for (int positionOfLetter = 0; positionOfLetter < commandBody.length(); positionOfLetter++) {
 
@@ -25,7 +25,7 @@ public class ConvertCommandBody {
 
                 bracesStack.push(commandBody.charAt(positionOfLetter));
 
-                if (firstBraceOfJson == 0) {
+                if (firstBraceOfJson == -1) {
                     firstBraceOfJson = positionOfLetter;
                 }
 
@@ -40,7 +40,7 @@ public class ConvertCommandBody {
 
                     String commandBodyJson = commandBody.substring(firstBraceOfJson, positionOfLetter + 1);
                     documents.add(convertToDocument(commandBodyJson));
-                    firstBraceOfJson = 0;
+                    firstBraceOfJson = -1;
                 }
             }
 
