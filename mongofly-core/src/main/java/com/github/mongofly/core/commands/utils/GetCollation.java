@@ -8,6 +8,17 @@ import java.util.Optional;
 
 public class GetCollation {
 
+    public static final String COLLATION = "collation";
+    public static final String LOCALE = "locale";
+    public static final String CASE_LEVEL = "caseLevel";
+    public static final String CASE_FIRST = "caseFirst";
+    public static final String STRENGTH = "strength";
+    public static final String NUMERIC_ORDERING = "numericOrdering";
+    public static final String ALTERNATE = "alternate";
+    public static final String MAX_VARIABLE = "maxVariable";
+    public static final String NORMALIZATION = "normalization";
+    public static final String BACKWARDS = "backwards";
+
     public static Optional<Collation> get(Document options) {
 
         if(!isCollation(options)) {
@@ -15,53 +26,53 @@ public class GetCollation {
             return Optional.empty();
         }
 
-        Document collation = options.get("collation", Document.class);
+        Document collation = options.get(COLLATION, Document.class);
 
         return Optional.of(convertCollation(collation));
     }
 
     private static boolean isCollation(Document document) {
-        return document.containsKey("collation");
+        return document.containsKey(COLLATION);
     }
 
     private static Collation convertCollation(Document collation) {
 
         Collation.Builder builder = Collation.builder();
 
-        if(collation.containsKey("locale")) {
-            builder.locale(collation.getString("locale"));
+        if(collation.containsKey(LOCALE)) {
+            builder.locale(collation.getString(LOCALE));
         }
 
-        if(collation.containsKey("caseLevel")) {
-            builder.caseLevel(collation.getBoolean("caseLevel"));
+        if(collation.containsKey(CASE_LEVEL)) {
+            builder.caseLevel(collation.getBoolean(CASE_LEVEL));
         }
 
-        if(collation.containsKey("caseFirst")) {
-            builder.collationCaseFirst(CollationCaseFirst.fromString(collation.getString("caseFirst")));
+        if(collation.containsKey(CASE_FIRST)) {
+            builder.collationCaseFirst(CollationCaseFirst.fromString(collation.getString(CASE_FIRST)));
         }
 
-        if(collation.containsKey("strength")) {
-            builder.collationStrength(CollationStrength.fromInt(collation.getInteger("strength")));
+        if(collation.containsKey(STRENGTH)) {
+            builder.collationStrength(CollationStrength.fromInt(collation.getInteger(STRENGTH)));
         }
 
-        if(collation.containsKey("numericOrdering")) {
-            builder.numericOrdering(collation.getBoolean("numericOrdering"));
+        if(collation.containsKey(NUMERIC_ORDERING)) {
+            builder.numericOrdering(collation.getBoolean(NUMERIC_ORDERING));
         }
 
-        if(collation.containsKey("alternate")) {
-            builder.collationAlternate(CollationAlternate.fromString(collation.getString("alternate")));
+        if(collation.containsKey(ALTERNATE)) {
+            builder.collationAlternate(CollationAlternate.fromString(collation.getString(ALTERNATE)));
         }
 
-        if(collation.containsKey("maxVariable")) {
-            builder.collationMaxVariable(CollationMaxVariable.fromString(collation.getString("maxVariable")));
+        if(collation.containsKey(MAX_VARIABLE)) {
+            builder.collationMaxVariable(CollationMaxVariable.fromString(collation.getString(MAX_VARIABLE)));
         }
 
-        if(collation.containsKey("normalization")) {
-            builder.normalization(collation.getBoolean("normalization"));
+        if(collation.containsKey(NORMALIZATION)) {
+            builder.normalization(collation.getBoolean(NORMALIZATION));
         }
 
-        if(collation.containsKey("backwards")) {
-            builder.backwards(collation.getBoolean("backwards"));
+        if(collation.containsKey(BACKWARDS)) {
+            builder.backwards(collation.getBoolean(BACKWARDS));
         }
 
         return builder.build();
