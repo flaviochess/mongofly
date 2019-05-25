@@ -19,36 +19,34 @@ public class RunUpdateCommand implements RunCommand {
     @Override
     public void run(String command) {
 
-        Update update = UpdateConvert.convert(command);
+        UpdateObject updateObject = UpdateConvert.convert(command);
 
         String collectionName = GetCollectionNameFromCommand.get(command);
 
-        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, update.getWriteConcern());
+        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, updateObject.getWriteConcern());
 
-        if (update.isMulti()) {
+        if (updateObject.isMulti()) {
 
-            if (update.getUpdateOptions().isPresent()) {
+            if (updateObject.getUpdateOptions().isPresent()) {
 
-                collection.updateMany(update.getQuery(), update.getUpdate(), update.getUpdateOptions().get());
+                collection.updateMany(updateObject.getQuery(), updateObject.getUpdate(), updateObject.getUpdateOptions().get());
 
             } else {
 
-                collection.updateMany(update.getQuery(), update.getUpdate());
+                collection.updateMany(updateObject.getQuery(), updateObject.getUpdate());
             }
 
         } else {
 
-            if (update.getUpdateOptions().isPresent()) {
+            if (updateObject.getUpdateOptions().isPresent()) {
 
-                collection.updateOne(update.getQuery(), update.getUpdate(), update.getUpdateOptions().get());
+                collection.updateOne(updateObject.getQuery(), updateObject.getUpdate(), updateObject.getUpdateOptions().get());
 
             } else {
 
-                collection.updateOne(update.getQuery(), update.getUpdate());
+                collection.updateOne(updateObject.getQuery(), updateObject.getUpdate());
             }
         }
     }
 
 }
-
-// se o $in realmente não funcionar executar o commando runCommand do drive com o código no formato antigo

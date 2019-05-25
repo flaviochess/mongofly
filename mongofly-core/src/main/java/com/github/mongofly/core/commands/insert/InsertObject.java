@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
-public class InsertMany {
+public class InsertObject {
 
     private List<Document> documents;
 

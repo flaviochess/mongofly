@@ -24,16 +24,16 @@ public class RunInsertCommand implements RunCommand {
 
     public void run(String command) {
 
-        InsertMany insertMany = InsertConvert.convert(command);
+        InsertObject insertObject = InsertConvert.convert(command);
 
         String collectionName = GetCollectionNameFromCommand.get(command);
 
-        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, insertMany.getWriteConcern());
+        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, insertObject.getWriteConcern());
 
-        List<List<Document>> partitionedDocuments = partitionDocuments(insertMany.getDocuments());
+        List<List<Document>> partitionedDocuments = partitionDocuments(insertObject.getDocuments());
 
         partitionedDocuments.forEach(documents -> {
-            collection.insertMany(documents, insertMany.getInsertOptions().orElse(new InsertManyOptions()));
+            collection.insertMany(documents, insertObject.getInsertOptions().orElse(new InsertManyOptions()));
         });
 
     }

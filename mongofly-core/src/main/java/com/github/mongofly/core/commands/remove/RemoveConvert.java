@@ -55,7 +55,7 @@ public class RemoveConvert {
 
     private static final String JUST_ONE = "justOne";
 
-    public static Delete convert(String command) {
+    public static DeleteObject convert(String command) {
 
         String commandBody = GetBodyFromCommand.get(command);
 
@@ -85,7 +85,7 @@ public class RemoveConvert {
 
         Boolean justOne = isJustOne(command, deleteParts);
 
-        return new Delete(query, deleteOptions, writeConcern, justOne);
+        return new DeleteObject(query, deleteOptions, writeConcern, justOne);
     }
 
 

@@ -27,7 +27,7 @@ import static com.github.mongofly.core.converts.CommandConvert.*;
 
 public class InsertConvert {
 
-    public static InsertMany convert(String command) {
+    public static InsertObject convert(String command) {
 
         String commandBody = GetBodyFromCommand.get(command);
 
@@ -59,7 +59,7 @@ public class InsertConvert {
 
         }
 
-        return new InsertMany(documents, insertManyOptions, writeConcern);
+        return new InsertObject(documents, insertManyOptions, writeConcern);
     }
 
     private static boolean isOptionsParameters(Document lastDocument) {

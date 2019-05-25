@@ -19,32 +19,32 @@ public class RunDeleteCommand implements RunCommand {
     @Override
     public void run(String command) {
 
-        Delete delete = RemoveConvert.convert(command);
+        DeleteObject deleteObject = RemoveConvert.convert(command);
 
         String collectionName = GetCollectionNameFromCommand.get(command);
 
-        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, delete.getWriteConcern());
+        MongoCollection<Document> collection = GetMongoCollection.get(db, collectionName, deleteObject.getWriteConcern());
 
-        if (delete.isJustOne()) {
+        if (deleteObject.isJustOne()) {
 
-            if (delete.getDeleteOptions().isPresent()) {
+            if (deleteObject.getDeleteOptions().isPresent()) {
 
-                collection.deleteOne(delete.getQuery(), delete.getDeleteOptions().get());
+                collection.deleteOne(deleteObject.getQuery(), deleteObject.getDeleteOptions().get());
 
             } else {
 
-                collection.deleteOne(delete.getQuery());
+                collection.deleteOne(deleteObject.getQuery());
             }
 
         } else {
 
-            if (delete.getDeleteOptions().isPresent()) {
+            if (deleteObject.getDeleteOptions().isPresent()) {
 
-                collection.deleteMany(delete.getQuery(), delete.getDeleteOptions().get());
+                collection.deleteMany(deleteObject.getQuery(), deleteObject.getDeleteOptions().get());
 
             } else {
 
-                collection.deleteMany(delete.getQuery());
+                collection.deleteMany(deleteObject.getQuery());
             }
             
         }

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
-public class Update {
+public class UpdateObject {
 
     private Document query;
 

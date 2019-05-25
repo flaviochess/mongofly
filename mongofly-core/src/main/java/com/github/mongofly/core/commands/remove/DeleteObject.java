@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Getter
 @AllArgsConstructor
-public class Delete {
+public class DeleteObject {
 
     private Document query;
 

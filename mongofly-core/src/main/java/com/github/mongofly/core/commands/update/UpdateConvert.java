@@ -68,7 +68,7 @@ public class UpdateConvert {
 
     private static final int COMMAND_OPERATION_PARAMETERS_POSITION = 2;
 
-    public static Update convert(String command) {
+    public static UpdateObject convert(String command) {
 
         String commandBody = GetBodyFromCommand.get(command);
 
@@ -95,7 +95,7 @@ public class UpdateConvert {
 
         Boolean multi = isMulti(command, updateParts);
 
-        return new Update(query, update, updateOptions, writeConcern, multi);
+        return new UpdateObject(query, update, updateOptions, writeConcern, multi);
     }
 
     private static Optional<UpdateOptions> convertOptions(Document options) {
