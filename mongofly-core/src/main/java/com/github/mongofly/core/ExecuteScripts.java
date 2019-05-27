@@ -3,14 +3,11 @@ package com.github.mongofly.core;
 import com.github.mongofly.core.commands.RunCommandFactory;
 import com.github.mongofly.core.commands.RunMongoCommand;
 import com.github.mongofly.core.domains.Mongofly;
-import com.github.mongofly.core.scripts.GetScriptFiles;
 import com.github.mongofly.core.domains.MongoflyRepository;
 import com.github.mongofly.core.exceptions.MongoflyException;
+import com.github.mongofly.core.scripts.GetScriptFiles;
 import com.mongodb.client.MongoDatabase;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -20,7 +17,6 @@ import java.nio.file.Path;
 import java.util.*;
 
 @Slf4j
-@Component
 public class ExecuteScripts {
 
     private GetScriptFiles getScriptFiles;
@@ -33,17 +29,16 @@ public class ExecuteScripts {
 
     private RunMongoCommand runMongoCommand;
 
-    public ExecuteScripts(MongoDatabase mongoDatabase, MongoflyRepository mongoflyRepository, GetScriptFiles getScriptFiles) {
+    public ExecuteScripts(MongoDatabase mongoDatabase) {
 
         this.mongoDatabase = mongoDatabase;
-        this.mongoflyRepository = mongoflyRepository;
-        this.getScriptFiles = getScriptFiles;
 
+        this.mongoflyRepository = new MongoflyRepository(mongoDatabase);
+        this.getScriptFiles = new GetScriptFiles();
         this.runCommandFactory = new RunCommandFactory(this.mongoDatabase);
         this.runMongoCommand = new RunMongoCommand(runCommandFactory);
     }
 
-    @EventListener(ApplicationReadyEvent.class)
     public void execute() {
 
         log.info("Starting Mongofly");

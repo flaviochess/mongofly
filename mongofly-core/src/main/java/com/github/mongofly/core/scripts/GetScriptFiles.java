@@ -1,7 +1,6 @@
 package com.github.mongofly.core.scripts;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -12,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@Component
 public class GetScriptFiles {
 
     private final static String SCRIPTS_CONFIGURATION_PATH = "mongofly";
