@@ -17,7 +17,7 @@ public class MongoflyStarter {
     @EventListener(ApplicationReadyEvent.class)
     public void execute() {
 
-        log.info("Mongofly Spring Boot Stater");
+        log.info("Mongofly Spring Boot Starter");
 
         executeScripts.execute();
     }
