@@ -1,5 +1,6 @@
 package com.github.mongofly.core.commands;
 
+import com.github.mongofly.core.commands.strictmode.ConvertToStrictMode;
 import com.github.mongofly.core.exceptions.MongoflyException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,10 +9,13 @@ public class RunMongoCommand {
 
     private static final String COMMAND_PREFIX = "db.";
 
-    private RunCommandFactory runCommandFactory;
+    private final RunCommandFactory runCommandFactory;
 
-    public RunMongoCommand(RunCommandFactory runCommandFactory) {
+    private final ConvertToStrictMode convertToStrictMode;
+
+    public RunMongoCommand(RunCommandFactory runCommandFactory, ConvertToStrictMode convertToStrictMode) {
         this.runCommandFactory = runCommandFactory;
+        this.convertToStrictMode = convertToStrictMode;
     }
 
     public void run(String command) {
@@ -22,9 +26,11 @@ public class RunMongoCommand {
             throw new MongoflyException("It's not a valid command. This does not start with \"db...\": " + command);
         }
 
+        String convertedCommand = convertToStrictMode.convert(command);
+
         try {
 
-            runCommandFactory.factory(command).run(command);
+            runCommandFactory.factory(convertedCommand).run(convertedCommand);
 
         } catch (RuntimeException ex) {
 
