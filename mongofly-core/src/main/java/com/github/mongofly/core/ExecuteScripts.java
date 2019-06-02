@@ -2,6 +2,7 @@ package com.github.mongofly.core;
 
 import com.github.mongofly.core.commands.RunCommandFactory;
 import com.github.mongofly.core.commands.RunMongoCommand;
+import com.github.mongofly.core.commands.strictmode.ConvertToStrictMode;
 import com.github.mongofly.core.domains.Mongofly;
 import com.github.mongofly.core.domains.MongoflyRepository;
 import com.github.mongofly.core.exceptions.MongoflyException;
@@ -36,7 +37,7 @@ public class ExecuteScripts {
         this.mongoflyRepository = new MongoflyRepository(mongoDatabase);
         this.getScriptFiles = new GetScriptFiles();
         this.runCommandFactory = new RunCommandFactory(this.mongoDatabase);
-        this.runMongoCommand = new RunMongoCommand(runCommandFactory);
+        this.runMongoCommand = new RunMongoCommand(runCommandFactory, new ConvertToStrictMode());
     }
 
     public void execute() {
