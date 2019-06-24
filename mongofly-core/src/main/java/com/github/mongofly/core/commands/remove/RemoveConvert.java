@@ -53,13 +53,7 @@ public class RemoveConvert {
 
     public static DeleteObject convert(String command) {
 
-        String commandBody = GetBodyFromCommand.get(command);
-
-        List<Document> deleteParts = ConvertCommandBody.toDocumentList(commandBody);
-
-        if(deleteParts.size() < COMMAND_MIN_PARTS || deleteParts.size() > COMMAND_MAX_PARTS) {
-            throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + command);
-        }
+        List<Document> deleteParts = ConvertCommand.toCommandParts(command, COMMAND_MIN_PARTS, COMMAND_MAX_PARTS);
 
         Document query = deleteParts.get(COMMAND_QUERY_POSITION);
 
