@@ -73,14 +73,7 @@ public class UpdateConvert {
 
     public static UpdateObject convert(String command) {
 
-        String commandBody = GetBodyFromCommand.get(command);
-
-        List<Document> updateParts = ConvertCommandBody.toDocumentList(commandBody);
-
-        if(updateParts.size() < COMMAND_MIN_PARTS || updateParts.size() > COMMAND_MAX_PARTS) {
-
-            throw new MongoflyException("Bad bson exception. There are problems with the sintaxe: ..." + command);
-        }
+        List<Document> updateParts = ConvertCommand.toCommandParts(command, COMMAND_MIN_PARTS, COMMAND_MAX_PARTS);
 
         Document query = updateParts.get(COMMAND_QUERY_POSITION);
         Document update = updateParts.get(COMMAND_UPDATE_POSITION);

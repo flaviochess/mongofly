@@ -14,7 +14,8 @@ public enum CommandType {
     UPDATE_MANY("updateMany"),
     REMOVE("remove"),
     DELETE_ONE("deleteOne"),
-    DELETE_MANY("deleteMany");
+    DELETE_MANY("deleteMany"),
+    CREATE_INDEX("createIndex");
 
     private String value;
 

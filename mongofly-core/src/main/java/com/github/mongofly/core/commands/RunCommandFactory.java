@@ -1,5 +1,6 @@
 package com.github.mongofly.core.commands;
 
+import com.github.mongofly.core.commands.createindex.RunCreateIndexCommand;
 import com.github.mongofly.core.commands.insert.RunInsertCommand;
 import com.github.mongofly.core.commands.remove.RunDeleteCommand;
 import com.github.mongofly.core.commands.update.RunUpdateCommand;
@@ -13,6 +14,7 @@ public class RunCommandFactory {
     private RunInsertCommand runInsertCommand;
     private RunUpdateCommand runUpdateCommand;
     private RunDeleteCommand runDeleteCommand;
+    private RunCreateIndexCommand runCreateIndexCommand;
 
     private MongoDatabase db;
 
@@ -48,6 +50,11 @@ public class RunCommandFactory {
                     runDeleteCommand = new RunDeleteCommand(db);
                 }
                 return runDeleteCommand;
+            case CREATE_INDEX:
+                if (runCreateIndexCommand == null) {
+                    runCreateIndexCommand = new RunCreateIndexCommand(db);
+                }
+                return runCreateIndexCommand;
             default:
                 throw new MongoflyException("Not implemented yet");
         }

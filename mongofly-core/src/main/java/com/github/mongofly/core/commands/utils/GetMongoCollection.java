@@ -14,6 +14,11 @@ public class GetMongoCollection {
             return db.getCollection(collectionName).withWriteConcern(writeConcern.get());
         }
 
+        return get(db, collectionName);
+    }
+
+    public static MongoCollection get(MongoDatabase db, String collectionName) {
+
         return db.getCollection(collectionName);
     }
 
