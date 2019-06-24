@@ -40,8 +40,8 @@ public class Mongofly {
 
         Mongofly mongofly = new Mongofly();
 
-        if (document.containsKey("id")) {
-            mongofly.setId(document.getString("id"));
+        if (document.containsKey("_id")) {
+            mongofly.setId(document.getObjectId("_id").toString());
         }
 
         if (document.containsKey("version")) {

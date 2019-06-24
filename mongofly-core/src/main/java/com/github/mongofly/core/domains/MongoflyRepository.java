@@ -3,8 +3,11 @@ package com.github.mongofly.core.domains;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 
 import java.util.Optional;
 
@@ -33,6 +36,14 @@ public class MongoflyRepository {
 
     public void save(Mongofly mongofly) {
 
+        if (mongofly.getId() != null) {
+
+            UpdateResult result = mongoCollection.updateOne(
+                    Filters.eq("_id", new ObjectId(mongofly.getId())),
+                    new Document("$set", mongofly.toDocument()));
+
+            return;
+        }
 
         mongoCollection.insertOne(mongofly.toDocument());
     }
