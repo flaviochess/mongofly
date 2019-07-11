@@ -4,7 +4,7 @@ Mongofly é um starter do Spring Boot para executar scripts do MongoDB. Ele é i
 
 ## Como utilizar
 
-Atualmente o projeto encontra-se apenas no repositório JitPack e funciona apenas em projetos já configurados com o Spring Data MongoDB.
+Atualmente o projeto encontra-se apenas no repositório JitPack e funciona em projetos já configurados com o Spring Data MongoDB.
 
 ### Pré requisitos
 
@@ -15,7 +15,7 @@ Esse starter utiliza o MongoDB já configurado no projeto para executar os scrip
 
 ### Configurando o Mongofly em seu projeto
 
-Atualmente o Mongofly encontra-se apenas no repostório de projetos JitPack, por isso é necessário ensinar ao seu gerenciador de dependencias que deve buscar bibliotecas de lá também.
+Atualmente o Mongofly encontra-se no repostório de projetos JitPack, por isso é necessário ensinar ao seu gerenciador de dependencias que deve buscar bibliotecas de lá também.
 
 No caso do Maven ficará assim:
 
@@ -96,35 +96,27 @@ db.users.update(
 
 ## Comandos aceitos
 
-Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não foram incluídos todos os comandos ou até mesmo parametros aceitos pelo MongoDB, mas acredito que atenda uma necessidade em geral. Na versão atual o projeto aceita basicamente insert, update e remove com algumas ressalvas quanto a parametros extras em alguns deles. Veja a seguir.
+Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não foram incluídos todos os comandos existentes no MongoDB até o momento, mas acredito que a cobertura desta biblioteca já atenda uma necessidade em geral. Na versão atual o projeto aceita basicamente `insert`, `insertOne`, `insertMany`, `update`, `updateOne`, `updateMany`, `remove`, `deleteOne`, `deleteMany` e `createIndex`. Veja a seguir a documentação oficial dos comandos do MongoDB e alguns detalhes extras:
 
-### Insert
+### Documentação do MongoDB
 
-É aceito apenas o commando `insert`, logo suas variações como `insertMany` ou `insertOne` não são suportadas ainda. Porém é aceito insert com um documento ou um array de documentos assim como o comando insert do MongoDB, reduzindo ou até mesmo eximando a necessidade de usar as variações do insert.
-
-Os parâmetros extras como `ordered` e `writeConcern` são aceitos.
-
-Documentação do MongoDB do Insert: https://docs.mongodb.com/manual/reference/method/db.collection.insert/
+* [insert](https://docs.mongodb.com/manual/reference/method/db.collection.insert/)
+* [insertOne](https://docs.mongodb.com/manual/reference/method/db.collection.insertOne/)
+* [insertMany](https://docs.mongodb.com/manual/reference/method/db.collection.insertMany/)
+* [update](https://docs.mongodb.com/manual/reference/method/db.collection.update/)
+* [updateOne](https://docs.mongodb.com/manual/reference/method/db.collection.updateOne/)
+* [updateMany](https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/)
+* [remove](https://docs.mongodb.com/manual/reference/method/db.collection.remove/)
+* [deleteOne](https://docs.mongodb.com/manual/reference/method/db.collection.deleteOne/)
+* [deleteMany](https://docs.mongodb.com/manual/reference/method/db.collection.deleteMany/)
 
 ### Update
 
-Assim como no caso do insert, é aceito apenas o comando `update` mas não as suas variações ainda.
-
-Os parâmetros extras `multi` e `writeConcern` são aceitos.
-
-Os parâmetros extras `upsert`, `collation` e `arrayFilters` **não** são aceitos ainda.
-
-Modificadores utilizados no meio do comando update como `$set`, `$addToSet` e `$each` não deveriam causar nenhum problema, mas até o momento foi testado apenas com os três citados. De qualquer forma não existe nenhum desenvolvimento específico para estes, por isso não deveria haver problemas com outros.
-
-Documentação do MongoDB do Update: https://docs.mongodb.com/manual/reference/method/db.collection.update/
-
-### Remove
-
-O remove não aceita **nenhum** dos parâmetros extras ainda, ou seja: `justOne`, `writeConcern` e `collation`.
+Modificadores utilizados no meio do comando update como `$set`, `$addToSet` e `$each` não devem causar nenhum problema, mas até o momento foi testado apenas com os três citados. De qualquer forma não houve nenhum desenvolvimento específico para estes que já foram testados, por isso não deveria haver problemas com outros.
 
 ## Como funciona o Mongofly
 
-Sempre que o projeto for inciado o Mongofly irá verificar os arquivos da pasta `mongofly` e verificar quais ainda não foram executados, olhando a *collection* também de nome `mongofly`. Ao termino da execução de cada arquivo é criado ou atualizado um documento na *collection* `mongofly` informando se o arquivo executou com sucesso ou não. Um exemplo seria:
+Sempre que o projeto for inciado o Mongofly irá verificar os arquivos da pasta `mongofly` e verificar quais ainda não foram executados, olhando a *collection* também de nome `mongofly` (criada automaticamente). Ao termino da execução de cada arquivo é criado ou atualizado um documento na *collection* `mongofly` informando se o arquivo executou com sucesso ou não. Um exemplo seria:
 
 ```
 {
@@ -142,30 +134,30 @@ A *collection* `mongofly` será criada apenas após a execução do primeiro arq
 ## Principais Tecnologias
 
 * [Java 8](https://www.oracle.com/technetwork/pt/java/javase/downloads/jdk8-downloads-2133151.html) - Linguagem de programação
-* [Spring Boot](https://spring.io/projects/spring-boot) - Framework de desenvolvimento
+* [Spring Boot 2](https://spring.io/projects/spring-boot) - Framework de desenvolvimento
 * [Maven](https://maven.apache.org/) - Gerenciador de dependencias
 
 ## Contribuição
 
 Para contribuir com este projeto por favor leio o [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) para mais detalhes de como o projeto está estruturado, do nosso código de conduta e os processos de como nos enviar pull requests.
 
-## Versioning
+## Versionamento
 
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+Utilizamos [SemVer](http://semver.org/) para o versionamento. Para verificiar as versões disponíveis, veja as [releases deste repositório](https://github.com/flaviochess/mongofly/releases).
 
-## Authors
+## Autores
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Flavio Andrade** - *Initial work* - [flaviochess](https://github.com/flaviochess)
 
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+Veja também a lista de [contribuidores](https://github.com/your/project/contributors) que participaram deste projeto.
 
-## License
+## Licença
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+Este projeto possui a licença Apache License 2.0 - veja o arquivo [LICENSE.md](LICENSE.md) para mais detalhes.
 
-## Acknowledgments
+## Agradecimentos
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+* As pessoas que criaram e mantém o driver de MongoDB para Java, cujo é muito bem feito.
+* Aos criadores do FlyWay cujo a maneira fácil de gerenciar scripts de banco inspirou este projeto.
+* Ao [PurpleBooth](https://github.com/PurpleBooth) por [seu READEME-Template](https://gist.github.com/PurpleBooth/109311bb0361f32d87a2).
 
