@@ -110,10 +110,6 @@ Este projeto teve como ideia inicial atender uma demanda pessoal, por isso não 
 * [deleteOne](https://docs.mongodb.com/manual/reference/method/db.collection.deleteOne/)
 * [deleteMany](https://docs.mongodb.com/manual/reference/method/db.collection.deleteMany/)
 
-### Update
-
-Modificadores utilizados no meio do comando update como `$set`, `$addToSet` e `$each` não devem causar nenhum problema, mas até o momento foi testado apenas com os três citados. De qualquer forma não houve nenhum desenvolvimento específico para estes que já foram testados, por isso não deveria haver problemas com outros.
-
 ## Como funciona o Mongofly
 
 Sempre que o projeto for inciado o Mongofly irá verificar os arquivos da pasta `mongofly` e verificar quais ainda não foram executados, olhando a *collection* também de nome `mongofly` (criada automaticamente). Ao termino da execução de cada arquivo é criado ou atualizado um documento na *collection* `mongofly` informando se o arquivo executou com sucesso ou não. Um exemplo seria:
