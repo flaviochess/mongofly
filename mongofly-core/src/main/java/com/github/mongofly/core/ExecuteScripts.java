@@ -7,6 +7,7 @@ import com.github.mongofly.core.domains.Mongofly;
 import com.github.mongofly.core.domains.MongoflyRepository;
 import com.github.mongofly.core.exceptions.MongoflyException;
 import com.github.mongofly.core.scripts.GetScriptFiles;
+import com.github.mongofly.core.scripts.GetScriptsFromClasspath;
 import com.mongodb.client.MongoDatabase;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,11 +17,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Slf4j
 public class ExecuteScripts {
 
     private GetScriptFiles getScriptFiles;
+
+    private GetScriptsFromClasspath getScriptsFromClasspath;
 
     private MongoflyRepository mongoflyRepository;
 
@@ -36,6 +40,7 @@ public class ExecuteScripts {
 
         this.mongoflyRepository = new MongoflyRepository(mongoDatabase);
         this.getScriptFiles = new GetScriptFiles();
+        this.getScriptsFromClasspath = new GetScriptsFromClasspath();
         this.runCommandFactory = new RunCommandFactory(this.mongoDatabase);
         this.runMongoCommand = new RunMongoCommand(runCommandFactory, new ConvertToStrictMode());
     }
@@ -44,7 +49,9 @@ public class ExecuteScripts {
 
         log.info("Starting Mongofly");
 
-        getScriptFiles.get().stream()
+        Stream.concat(
+            getScriptFiles.get().stream(),
+            getScriptsFromClasspath.get().stream())
                 .filter(this::isUnexecutedScripts)
                 .sorted(Comparator.comparing(this::getFileName))
                 .forEach(this::fileProcess);

@@ -41,7 +41,7 @@ E no Gradle
 
 Para outros gerenciadores de dependencias consultar a página do projeto no JitPack: [https://jitpack.io/mongofly](https://jitpack.io/#flaviochess/mongofly)
 
-Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto, onde ficarão armazenado os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection também chamada `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
+Também é necessário criar uma pasta chamada `mongofly` na raiz do seu projeto ou no seu classpath (por exemplo `src/main/resources/mongofly`), onde ficarão armazenados os scripts do MongoDB que devem ser executados. Assim que o projeto for iniciado, o Mongofly irá verificar na collection também chamada `mongofly` os arquivos que ainda não foram executados com sucesso e executar-los.
 
 ## Criando os scripts
 
