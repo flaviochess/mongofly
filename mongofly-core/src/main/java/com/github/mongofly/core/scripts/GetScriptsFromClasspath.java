@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class GetScriptsFromClasspath {
 
         try {
             assert resource != null;
-            Path path = Path.of(resource.toURI());
+            Path path = Paths.get(resource.toURI());
             if (isValidDirectory(path)) {
                 ArrayList<Path> paths = Lists.newArrayList();
                 Files.newDirectoryStream(path, p -> p.getFileName().toString().endsWith(".json"))
