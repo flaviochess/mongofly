@@ -10,19 +10,16 @@ import com.github.mongofly.core.scripts.GetScriptFiles;
 import com.github.mongofly.core.scripts.GetScriptsFromClasspath;
 import com.mongodb.client.MongoDatabase;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
 
 @Slf4j
 public class ExecuteScripts {
-
-    private GetScriptFiles getScriptFiles;
 
     private GetScriptsFromClasspath getScriptsFromClasspath;
 
@@ -37,9 +34,7 @@ public class ExecuteScripts {
     public ExecuteScripts(MongoDatabase mongoDatabase) {
 
         this.mongoDatabase = mongoDatabase;
-
         this.mongoflyRepository = new MongoflyRepository(mongoDatabase);
-        this.getScriptFiles = new GetScriptFiles();
         this.getScriptsFromClasspath = new GetScriptsFromClasspath();
         this.runCommandFactory = new RunCommandFactory(this.mongoDatabase);
         this.runMongoCommand = new RunMongoCommand(runCommandFactory, new ConvertToStrictMode());
@@ -49,19 +44,17 @@ public class ExecuteScripts {
 
         log.info("Starting Mongofly");
 
-        Stream.concat(
-            getScriptFiles.get().stream(),
-            getScriptsFromClasspath.get().stream())
-                .filter(this::isUnexecutedScripts)
-                .sorted(Comparator.comparing(this::getFileName))
-                .forEach(this::fileProcess);
+        getScriptsFromClasspath.get().stream()
+            .filter(this::isUnexecutedScripts)
+            .sorted(Comparator.comparing(Resource::getFilename))
+            .forEach(this::fileProcess);
 
         log.info("Finish Mongofly");
     }
 
-    private boolean isUnexecutedScripts(Path path) {
+    private boolean isUnexecutedScripts(Resource resource) {
 
-        String version = getFileVersion(path);
+        String version = getFileVersion(resource.getFilename());
         Optional<Mongofly> execution = mongoflyRepository.findByVersion(version);
 
         log.debug("Script " + version + " executed: " + execution.isPresent());
@@ -69,12 +62,12 @@ public class ExecuteScripts {
         return !execution.isPresent() || !execution.get().isSuccess();
     }
 
-    private void fileProcess(Path path) {
+    private void fileProcess(Resource resource) {
 
-        String version = getFileVersion(path);
-        Mongofly mongofly = mongoflyRepository.findByVersion(version).orElse(newMongofly(path));
+        String version = getFileVersion(resource.getFilename());
+        Mongofly mongofly = mongoflyRepository.findByVersion(version).orElse(newMongofly(resource));
 
-        List<String> commands = extractCommands(path);
+        List<String> commands = extractCommands(resource);
 
         try {
 
@@ -99,11 +92,11 @@ public class ExecuteScripts {
 
     }
 
-    private Mongofly newMongofly(Path path) {
+    private Mongofly newMongofly(Resource resource) {
 
         Mongofly mongofly = new Mongofly();
-        mongofly.setScript(getFileName(path));
-        mongofly.setVersion(getFileVersion(path));
+        mongofly.setScript(resource.getFilename());
+        mongofly.setVersion(getFileVersion(resource.getFilename()));
 
         return mongofly;
     }
@@ -113,20 +106,17 @@ public class ExecuteScripts {
         return path.getFileName().toString();
     }
 
-    private String getFileVersion(Path path) {
-
-        String scriptName = getFileName(path);
-        return scriptName.split("__")[0].toUpperCase().replace("V", "");
+    private String getFileVersion(String filename) {
+        return filename.split("__")[0].toUpperCase().replace("V", "");
     }
 
-    private List<String> extractCommands(Path path) {
+    private List<String> extractCommands(Resource resource) {
 
-        List<String> commands = new ArrayList();
+        List<String> commands = new ArrayList<>();
 
         StringBuilder command = new StringBuilder();
-        File scriptFile = path.toFile();
 
-        try (BufferedReader br = new BufferedReader(new FileReader(scriptFile))) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(resource.getInputStream()))) {
 
             String line;
             while ((line = br.readLine()) != null) {
@@ -142,9 +132,7 @@ public class ExecuteScripts {
                 if (line.endsWith(";")) {
                     commands.add(command.toString());
                     command = new StringBuilder();
-                    continue;
                 }
-
             }
 
             if (command.length() > 0) {
